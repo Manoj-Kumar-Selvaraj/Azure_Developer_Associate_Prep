@@ -568,6 +568,342 @@ def main(queueItem: str, outputBlob: func.Out[str]):
 * 🔸 Optional input/output bindings
 
 * 📦 Output bindings use `func.Out[]` in code (Python/C#)
+---
+
+## ✅ A–Z Guide for Azure Functions (for AZ-204 Developer Associate)
 
 ---
+
+### 🔹 **A. What is Azure Functions?**
+
+* Serverless compute service.
+* You write just the code; Azure handles infrastructure.
+* Event-driven (run on triggers like HTTP, Timer, Queue, etc.)
+
+---
+
+### 🔹 **B. Hosting Plans**
+
+| Plan                        | Cold Start | Scaling             | Duration                | VNET  | Pricing           |
+| --------------------------- | ---------- | ------------------- | ----------------------- | ----- | ----------------- |
+| **Consumption**             | ❌ Yes      | Auto                | 5 mins default (max 60) | ❌ No  | Pay per execution |
+| **Premium**                 | ✅ No       | Auto + min instance | Unlimited               | ✅ Yes | More costly       |
+| **Dedicated (App Service)** | ✅ No       | Manual              | Unlimited               | ✅ Yes | Flat cost         |
+
+---
+
+### 🔹 **C. Triggers (What starts the function?)**
+
+* **HTTP Trigger** – On web requests (GET/POST)
+* **Timer Trigger** – Based on CRON schedule
+* **Queue Trigger** – From Azure Storage Queue
+* **Service Bus Trigger** – From Service Bus messages
+* **Event Hub Trigger** – High-speed event ingestion
+* **Blob Trigger** – When a file is added/updated
+* **Cosmos DB Trigger** – On DB change feed
+
+---
+
+### 🔹 **D. Input/Output Bindings (How functions get/set data)**
+
+Bindings let your function **interact with external resources** without writing plumbing code.
+
+| Binding Type | Direction | Example               |
+| ------------ | --------- | --------------------- |
+| Blob         | In/Out    | Image processing      |
+| Queue        | In/Out    | Message queuing       |
+| Cosmos DB    | In/Out    | Read/write documents  |
+| Table        | In/Out    | Table storage         |
+| SignalR      | Out       | Real-time updates     |
+| HTTP         | In/Out    | HTTP request/response |
+
+---
+
+### 🔹 **E. function.json – Trigger & Binding Definition**
+
+Example:
+
+```json
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["get", "post"]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}
+```
+
+---
+
+### 🔹 **F. host.json – Runtime Configuration (Global or Per-Trigger)**
+
+Example:
+
+```json
+{
+  "version": "2.0",
+  "functionTimeout": "00:05:00",
+  "extensions": {
+    "queues": {
+      "batchSize": 16,
+      "newBatchThreshold": 8
+    },
+    "http": {
+      "routePrefix": "api",
+      "maxConcurrentRequests": 100
+    }
+  },
+  "retry": {
+    "strategy": "fixedDelay",
+    "maxRetryCount": 5,
+    "delayInterval": "00:00:05"
+  }
+}
+```
+
+---
+
+### 🔹 **G. local.settings.json – Local Development Settings**
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "<connection string>",
+    "FUNCTIONS_WORKER_RUNTIME": "python"
+  }
+}
+```
+
+---
+
+### 🔹 **H. Authorization Levels (for HTTP Trigger)**
+
+| Level     | Description               |
+| --------- | ------------------------- |
+| Anonymous | No key required           |
+| Function  | Requires function key     |
+| Admin     | Requires master/admin key |
+
+---
+
+### 🔹 **I. Retry Policies (host.json)**
+
+```json
+"retry": {
+  "strategy": "exponentialBackoff",
+  "maxRetryCount": 5,
+  "minimumInterval": "00:00:02",
+  "maximumInterval": "00:01:00"
+}
+```
+
+---
+
+### 🔹 **J. Durable Functions (Orchestration)**
+
+Use for:
+
+* Workflows
+* Human approvals
+* Fan-out/Fan-in
+* External event waiting
+
+Key patterns:
+
+* `CallActivityAsync` – Run small task
+* `Task.WhenAll(...)` – Parallel tasks
+* `WaitForExternalEvent` – Wait for signal
+* `CreateTimer` – Delay
+* `ContinueAsNew` – Loop pattern
+
+---
+
+### 🔹 **K. Monitoring (Application Insights)**
+
+* Automatically integrated.
+* Logs, traces, metrics.
+* Enable via Azure Portal or App Settings.
+
+---
+
+### 🔹 **L. CI/CD Deployment**
+
+Options:
+
+* Azure DevOps Pipelines
+* GitHub Actions
+* VS Code Publish
+* Zip deployment
+
+Example GitHub Actions:
+
+```yaml
+uses: Azure/functions-action@v1
+with:
+  app-name: myfuncapp
+  package: './'
+```
+
+---
+
+### 🔹 **M. Scaling Behavior**
+
+* **Consumption Plan**: Auto-scale by demand.
+* **Premium**: Auto-scale + minimum instances (no cold start).
+* **Dedicated**: Scale via App Service Scale Out settings.
+
+---
+
+### 🔹 **N. VNET Integration**
+
+* Only available in **Premium** & **Dedicated**
+* Use to access private resources like DB, services, etc.
+
+---
+
+### 🔹 **O. Deployment Slots**
+
+* Like Web Apps, Functions support slots.
+* Common: `staging`, `production`.
+* Zero-downtime swaps.
+
+---
+
+### 🔹 **P. App Settings & Secrets**
+
+Use **Application Settings** or **Key Vault + Managed Identity**:
+
+```json
+"AzureWebJobsStorage": "@Microsoft.KeyVault(SecretUri=https://vault/secrets/connection)"
+```
+
+---
+
+### 🔹 **Q. Bindings Advanced Scenarios**
+
+Example: HTTP in + Cosmos DB out
+
+```json
+{
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in"
+    },
+    {
+      "type": "cosmosDB",
+      "name": "outputDoc",
+      "direction": "out",
+      "databaseName": "mydb",
+      "collectionName": "items",
+      "createIfNotExists": true
+    }
+  ]
+}
+```
+
+---
+
+### 🔹 **R. Error Handling**
+
+* Retry policies (host.json)
+* Manual retry with Durable Functions
+* Try/catch blocks in code
+* Poison message queue (for failed queue processing)
+
+---
+
+### 🔹 **S. Timer Trigger – CRON Format**
+
+```json
+"schedule": "0 */5 * * * *" // Every 5 minutes
+```
+
+Format: `second minute hour day month day-of-week`
+
+---
+
+### 🔹 **T. Function Timeout**
+
+* Set in `host.json`
+
+```json
+"functionTimeout": "00:10:00"
+```
+
+* Default for Consumption = 5 min
+* Max for Consumption = 60 min
+* Premium = Unlimited
+
+---
+
+### 🔹 **U. Languages Supported**
+
+* C#
+* JavaScript
+* TypeScript
+* Python
+* Java
+* PowerShell
+* Custom handlers
+
+---
+
+### 🔹 **V. Durable Task Status**
+
+Query orchestration status using HTTP API:
+
+```
+GET /runtime/webhooks/durabletask/instances/{instanceId}
+```
+
+---
+
+### 🔹 **W. Cost Optimization**
+
+* Use **Consumption Plan** for bursty workloads.
+* Disable Always On if not needed.
+* Avoid excessive retries.
+
+---
+
+### 🔹 **X. Bindings vs Triggers**
+
+* **Trigger** = Starts the function (must be only one)
+* **Binding** = Input or Output data sources (can be many)
+
+---
+
+### 🔹 **Y. Logging**
+
+Use:
+
+* `ILogger` in .NET
+* `context.log()` in JavaScript/Python
+* View logs in App Insights or Log Analytics
+
+---
+
+### 🔹 **Z. Best Practices**
+
+* Use environment-specific settings
+* Avoid cold starts with Premium
+* Secure secrets with Key Vault
+* Use Durable Functions for long workflows
+* Monitor via Application Insights
+
+---
+
 
