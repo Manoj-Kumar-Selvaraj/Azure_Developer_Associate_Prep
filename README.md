@@ -361,6 +361,213 @@ Use with:
 | Azure Monitor Logs  | Metrics + logging platform                  |
 
 ---
+---
+---
 
+# APP FUNCTIONS
 
+Understanding `.json` config files and the **Triggers**, **Input Bindings**, and **Output Bindings** is *critical* for mastering Azure Functions — both for **AZ-204** and real-world use. Let's break this down clearly and thoroughly.
+
+---
+
+## ✅ **Key JSON Files in Azure Functions**
+
+### 1. `function.json`
+
+Defines metadata for **a specific function**: its **trigger**, **input**, and **output** bindings.
+
+#### 🧩 Structure:
+
+```json
+{
+  "bindings": [
+    {
+      "name": "req",
+      "type": "httpTrigger",
+      "direction": "in",
+      "authLevel": "function",
+      "methods": ["get", "post"]
+    },
+    {
+      "name": "$return",
+      "type": "http",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "__init__.py"
+}
+```
+
+#### 🧠 Key Concepts:
+
+| Property     | Description                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `type`       | Trigger type (e.g., `httpTrigger`, `queueTrigger`, `blobTrigger`) or binding type (`queue`, `table`, etc.) |
+| `name`       | Variable name used in code                                                                                 |
+| `direction`  | `in` or `out`                                                                                              |
+| `authLevel`  | `anonymous`, `function`, or `admin` (only for HTTP triggers)                                               |
+| `methods`    | HTTP methods (for HTTP trigger)                                                                            |
+| `scriptFile` | Path to function code (default `index.js`, `run.csx`, or `__init__.py`)                                    |
+
+---
+
+### 2. `host.json`
+
+Controls **global configuration** for all functions in an app.
+
+#### 🧩 Example:
+
+```json
+{
+  "version": "2.0",
+  "functionTimeout": "00:10:00",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 5
+      }
+    }
+  },
+  "extensions": {
+    "http": {
+      "routePrefix": "api"
+    },
+    "queues": {
+      "maxDequeueCount": 5,
+      "visibilityTimeout": "00:00:30"
+    }
+  }
+}
+```
+
+#### 🧠 Common Settings:
+
+| Setting                       | Purpose                                                 |
+| ----------------------------- | ------------------------------------------------------- |
+| `functionTimeout`             | Max function runtime (e.g. "00:05:00")                  |
+| `extensions.http.routePrefix` | Base path for HTTP routes (empty string removes `/api`) |
+| `queues.maxDequeueCount`      | Retry count before poison queue                         |
+| `logging`                     | App Insights settings                                   |
+
+---
+
+### 3. `local.settings.json` (only for **local dev**)
+
+Contains **environment variables** and local config for the runtime emulator.
+
+#### 🧩 Example:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "MySecretKey": "12345"
+  },
+  "Host": {
+    "CORS": "*"
+  }
+}
+```
+
+> ⚠️ Not deployed to Azure. Used by **local dev tools and emulator**.
+
+---
+
+## ✅ Triggers, Input Bindings, Output Bindings
+
+### 🔹 **Trigger** (Exactly ONE per function)
+
+**Starts the function**.
+
+| Trigger Type        | Usage                |
+| ------------------- | -------------------- |
+| `httpTrigger`       | REST calls           |
+| `queueTrigger`      | Azure Queue          |
+| `blobTrigger`       | New file in Blob     |
+| `timerTrigger`      | Cron jobs            |
+| `eventGridTrigger`  | Event Grid           |
+| `serviceBusTrigger` | Service Bus messages |
+
+---
+
+### 🔸 **Input Binding** (Optional)
+
+**Reads data** into the function from a service (like a database, blob, queue).
+
+| Type       | Example Usage                 |
+| ---------- | ----------------------------- |
+| `blob`     | Read file content             |
+| `queue`    | Read queue message            |
+| `table`    | Read a row from Table Storage |
+| `cosmosDB` | Query from CosmosDB           |
+
+---
+
+### 🔸 **Output Binding** (Optional)
+
+**Writes data** from the function to an external service.
+
+| Type       | Example Usage            |
+| ---------- | ------------------------ |
+| `queue`    | Add message to queue     |
+| `blob`     | Save file                |
+| `table`    | Insert/update table row  |
+| `cosmosDB` | Add document to CosmosDB |
+| `sendGrid` | Send email               |
+| `eventHub` | Publish message          |
+
+---
+
+### 🧩 Example: Queue Trigger with Output Binding to Blob
+
+#### `function.json`:
+
+```json
+{
+  "bindings": [
+    {
+      "name": "queueItem",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "myqueue",
+      "connection": "AzureWebJobsStorage"
+    },
+    {
+      "name": "outputBlob",
+      "type": "blob",
+      "path": "outputcontainer/{queueTrigger}.txt",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
+    }
+  ]
+}
+```
+
+#### Python Example:
+
+```python
+def main(queueItem: str, outputBlob: func.Out[str]):
+    outputBlob.set(f"Processed: {queueItem}")
+```
+
+---
+
+## 🧠 Tips to Memorize Quickly
+
+* ✅ `function.json` → Per-function config: Triggers & bindings
+
+* ✅ `host.json` → App-wide config: timeouts, retries, logging
+
+* ✅ `local.settings.json` → Only for local: secrets, env vars
+
+* 🔹 One trigger per function
+
+* 🔸 Optional input/output bindings
+
+* 📦 Output bindings use `func.Out[]` in code (Python/C#)
+
+---
 
