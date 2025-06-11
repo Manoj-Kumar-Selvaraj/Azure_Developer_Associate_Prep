@@ -904,6 +904,102 @@ Use:
 * Use Durable Functions for long workflows
 * Monitor via Application Insights
 
+
+Here’s a **highly focused, memorization-friendly cheat list** of the **key patterns and keywords** you should master:
+
 ---
 
+## 🧠 **KEY PATTERNS & KEYWORDS TO MEMORIZE FOR AZURE FUNCTIONS**
+
+---
+
+### 🔹 `function.json` — Per Function Config
+
+| **Field**            | **Purpose**                      | **Must Remember** Keywords                                                |
+| -------------------- | -------------------------------- | ------------------------------------------------------------------------- |
+| `type`               | Defines trigger/binding type     | `httpTrigger`, `queueTrigger`, `blob`, `eventHub`, `orchestrationTrigger` |
+| `direction`          | `in` or `out`                    | Triggers are `in`, outputs are `out`                                      |
+| `name`               | Variable used in code            | Like `req`, `res`, `myQueueItem`                                          |
+| `authLevel`          | For HTTP trigger                 | `anonymous`, `function`, `admin`                                          |
+| `route`              | Custom endpoint path             | Used for HTTP functions                                                   |
+| `queueName` / `path` | Resource name (queue/blob/event) | Watch casing and plural/singular                                          |
+| `connection`         | App setting key with conn string | `AzureWebJobsStorage`, `MyStorageConn`                                    |
+
+✅ **Mnemonic**: *"Type-Direction-Name-Connection"*
+
+---
+
+### 🔹 Common `type` Values in Bindings
+
+| **Trigger Type**    | **Binding Keyword (`type`)**                                     | Example                                        |
+| ------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| HTTP Trigger        | `httpTrigger`                                                    | `authLevel`, `methods`                         |
+| Queue Trigger       | `queueTrigger`                                                   | `queueName`, `connection`                      |
+| Blob Input/Output   | `blob`                                                           | `path`, `connection`                           |
+| Timer Trigger       | `timerTrigger`                                                   | `schedule` (cron)                              |
+| Service Bus Trigger | `serviceBusTrigger`                                              | `queueName` or `topicName`, `subscriptionName` |
+| Durable Functions   | `orchestrationTrigger`, `activityTrigger`, `orchestrationClient` | Only for Durable setup                         |
+
+---
+
+### 🔹 `host.json` — Global Settings (Applies to All Functions)
+
+| **Key Section**         | **Important Subkeys**    | Must-Memorize Keywords                                |
+| ----------------------- | ------------------------ | ----------------------------------------------------- |
+| `version`               | Always `"2.0"`           | Static                                                |
+| `functionTimeout`       | Max runtime per function | `"00:05:00"`                                          |
+| `retry`                 | Retry strategy           | `strategy`, `maxRetryCount`, `delayInterval`          |
+| `extensions.http`       | HTTP-specific tuning     | `maxConcurrentRequests`, `routePrefix`                |
+| `extensions.queues`     | Queue trigger tuning     | `batchSize`, `newBatchThreshold`, `maxDequeueCount`   |
+| `extensions.serviceBus` | Service Bus tuning       | `prefetchCount`, `maxConcurrentCalls`, `autoComplete` |
+
+✅ **Patterns to remember**:
+
+* Retry config: `retry -> strategy, maxRetryCount, delayInterval`
+* Queues config: `queues -> batchSize, newBatchThreshold, maxDequeueCount`
+* SB config: `serviceBus -> prefetchCount, maxConcurrentCalls`
+
+---
+
+### 🔹 `local.settings.json` — Dev-Only Settings
+
+| **Key**                           | **Use**                             |
+| --------------------------------- | ----------------------------------- |
+| `IsEncrypted`                     | Always `false` for local dev        |
+| `Values.AzureWebJobsStorage`      | Storage account conn string         |
+| `Values.FUNCTIONS_WORKER_RUNTIME` | Runtime: `dotnet`, `python`, `node` |
+| `Host.LocalHttpPort`              | Port for local testing              |
+| `Host.CORS`                       | Allowed origins                     |
+
+✅ Always remember:
+
+* `AzureWebJobsStorage` is **mandatory** for most bindings (queues, blob, etc.)
+* `FUNCTIONS_WORKER_RUNTIME` defines the language
+
+---
+
+## 🧪 Binding & Trigger Mnemonics
+
+| **Binding**           | **Keyword Triggers**                                               | **Tip**                      |
+| --------------------- | ------------------------------------------------------------------ | ---------------------------- |
+| Timer                 | `timerTrigger`, `schedule`                                         | Cron required                |
+| HTTP                  | `httpTrigger`, `authLevel`, `route`                                | `authLevel` is exam hot spot |
+| Queue                 | `queueTrigger`, `queueName`, `connection`                          | Watch case!                  |
+| Blob                  | `blob`, `path`, `connection`                                       | Output vs Input?             |
+| Service Bus           | `serviceBusTrigger`, `topicName`, `subscriptionName`, `connection` | Know pub-sub                 |
+| Durable Orchestration | `orchestrationTrigger`, `orchestrationClient`, `activityTrigger`   | Three pieces needed          |
+
+---
+
+## 📚 Suggested Exam Drill Questions Based on These Patterns
+
+To test memory, expect questions like:
+
+* *Which file should you modify to configure a timer schedule?*
+* *Which `host.json` key controls retry for queue triggers?*
+* *Where do you define `authLevel` for HTTP?*
+* *What field in `function.json` holds the name of the queue?*
+* *Which field in `host.json` controls parallel message handling for SB?*
+
+---
 
