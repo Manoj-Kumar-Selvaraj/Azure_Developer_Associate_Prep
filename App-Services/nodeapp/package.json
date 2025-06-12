@@ -1,0 +1,14 @@
+{
+  "name": "infra-test-app",
+  "version": "1.0.0",
+  "description": "Node.js 22 test app for Azure App Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "author": "AzureDevTest",
+  "license": "MIT"
+}

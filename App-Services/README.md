@@ -60,6 +60,7 @@ Note:
 * You can also use `--sku B1` for Basic tier or `--sku S1` for Standard tier, depending on your needs.
 * If you want a Windows-based environment, omit `--is-linux`.
 * App service plan is regional, so it will be created in the same region as your resource group.
+* Since its regional, it wont be used for a app service created in different region.
 * App Service Plans can host multiple web apps, so you can scale your applications easily.
 * You can also scale up or down your App Service Plan later based on your needs.
 * You can use the `--number-of-workers` parameter to specify how many instances you want to run your app on. For example, `--number-of-workers 2` will create two instances of your app.( This is horizontal scaling, which is different from vertical scaling where you increase the resources of a single instance.)
@@ -129,13 +130,13 @@ Choose a runtime. Example: Node.js
 
 ```bash
 az webapp create \
-  --resource-group MyResourceGroup \
+  --resource-group Developer_Associate \
   --plan MyAppServicePlan \
   --name mywebapp$RANDOM \
-  --runtime "NODE|18-lts"
+  --runtime "NODE|22-lts"
 ```
 
-📌 Replace `NODE|18-lts` with other runtimes if needed (e.g., `DOTNETCORE|6.0`, `PYTHON|3.10`, etc.)
+📌 Replace `NODE|22-lts` with other runtimes if needed (e.g., `DOTNETCORE|6.0`, `PYTHON|3.10`, etc.)
 📌 `mywebapp$RANDOM` ensures a unique name globally.
 
 ---
@@ -144,11 +145,19 @@ az webapp create \
 
 ### Option 1: Deploy ZIP Package
 
+#### Create a folder structure for the code
+
+nodeapp/
+├── server.js
+├── package.json
+└── .zip (will be created)
+
+
 ```bash
 az webapp deployment source config-zip \
-  --resource-group MyResourceGroup \
-  --name <your-webapp-name> \
-  --src <path-to-zip-file>
+  --resource-group Developer_Associate \
+  --name mywebapp6176 \
+  --src nodeapp.zip
 ```
 
 📦 Make sure you zip your app before deploying.
