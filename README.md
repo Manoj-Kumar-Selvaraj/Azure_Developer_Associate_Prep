@@ -1003,3 +1003,197 @@ To test memory, expect questions like:
 
 ---
 
+## ✅ `function.json` — Detailed Config Keywords
+
+Each Azure Function has its own `function.json` file. Here's what the common fields mean:
+
+---
+
+### 🔹 `type`
+
+* **What it is:** Specifies the trigger or binding type.
+* **Examples:** `httpTrigger`, `queueTrigger`, `blob`, `serviceBusTrigger`, etc.
+* **Why it matters:** It defines how your function is invoked (trigger) or connected to other services (bindings).
+
+---
+
+### 🔹 `direction`
+
+* **Values:** `"in"` (trigger or input binding) or `"out"` (output binding)
+* **Why it matters:** It tells Azure which way the data flows.
+
+---
+
+### 🔹 `name`
+
+* **What it is:** The variable name used inside your code.
+* **Example:** `"name": "req"` means `req` will be used in function code to access input.
+* **Why it matters:** This is how your function accesses the binding in code.
+
+---
+
+### 🔹 `authLevel`
+
+* **Values:** `anonymous`, `function`, `admin`
+* **Use Case:** For HTTP triggers, defines who can access the function.
+* **Example:** `anonymous` means anyone can call it (no key needed); `function` means key required.
+* **Why it matters:** Used for security at the function level.
+
+---
+
+### 🔹 `route`
+
+* **What it is:** Custom route for HTTP function.
+* **Example:** `route: "products/{id}"` → becomes `https://<functionapp>/api/products/42`
+* **Why it matters:** Gives flexibility in designing RESTful endpoints.
+
+---
+
+### 🔹 `queueName`, `path`, `connection`
+
+* **What they are:** Used to point to resources like queues, blobs, etc.
+* **`connection`:** Refers to the app setting key name that holds the connection string.
+* **Example:**
+
+  ```json
+  {
+    "type": "queueTrigger",
+    "name": "myQueueItem",
+    "direction": "in",
+    "queueName": "my-queue",
+    "connection": "AzureWebJobsStorage"
+  }
+  ```
+* **Why they matter:** Used to connect your function to external resources securely.
+
+---
+
+## ✅ `host.json` — Global Runtime Settings
+
+---
+
+### 🔹 `"retry"`
+
+```json
+"retry": {
+  "strategy": "fixedDelay",
+  "maxRetryCount": 5,
+  "delayInterval": "00:00:10"
+}
+```
+
+| Field                | Meaning                                                          |
+| -------------------- | ---------------------------------------------------------------- |
+| `strategy`           | `"fixedDelay"` or `"exponentialBackoff"`                         |
+| `fixedDelay`         | Retry after fixed time interval (good for consistent retry gaps) |
+| `exponentialBackoff` | Retry delays grow exponentially (good for transient issues)      |
+| `maxRetryCount`      | How many times to retry if failure happens                       |
+| `delayInterval`      | How long to wait between retries (only for fixedDelay strategy)  |
+
+> **Why it matters:** Ensures transient failures are retried without manual code.
+
+---
+
+### 🔹 `"queues"`
+
+```json
+"queues": {
+  "batchSize": 32,
+  "newBatchThreshold": 16,
+  "maxDequeueCount": 5
+}
+```
+
+| Field               | Meaning                                                           |
+| ------------------- | ----------------------------------------------------------------- |
+| `batchSize`         | Max number of messages fetched at once                            |
+| `newBatchThreshold` | When remaining messages < this, fetch next batch                  |
+| `maxDequeueCount`   | Max times to retry a failed message before moving to poison queue |
+
+> **Why it matters:** Controls performance and fault handling for queue-based functions.
+
+---
+
+### 🔹 `"serviceBus"`
+
+```json
+"serviceBus": {
+  "prefetchCount": 100,
+  "maxConcurrentCalls": 16,
+  "autoComplete": false
+}
+```
+
+| Field                | Meaning                                                             |
+| -------------------- | ------------------------------------------------------------------- |
+| `prefetchCount`      | Number of messages fetched in advance                               |
+| `maxConcurrentCalls` | How many messages can be processed in parallel                      |
+| `autoComplete`       | Whether to auto-mark messages as completed (true) or do it manually |
+
+> **Why it matters:** Gives control over concurrency and reliability in Service Bus functions.
+
+---
+
+### 🔹 `"http"`
+
+```json
+"http": {
+  "routePrefix": "api",
+  "maxConcurrentRequests": 50
+}
+```
+
+| Field                   | Meaning                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `routePrefix`           | Prefix for all HTTP routes (`api` by default)            |
+| `maxConcurrentRequests` | How many HTTP requests can be processed at the same time |
+
+> **Why it matters:** Controls how your HTTP endpoints are structured and how scalable your app is.
+
+---
+
+### 🔹 `functionTimeout`
+
+```json
+"functionTimeout": "00:10:00"
+```
+
+* **What it is:** Max time a single function invocation can run (10 mins max in Consumption plan)
+* **Why it matters:** Prevents infinite running functions from consuming resources
+
+---
+
+## ✅ `local.settings.json` — For Local Development Only
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "<storage-connection-string>",
+    "FUNCTIONS_WORKER_RUNTIME": "node"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  }
+}
+```
+
+| Key                        | Description                                        |
+| -------------------------- | -------------------------------------------------- |
+| `IsEncrypted`              | Always false in local; Azure uses encrypted values |
+| `AzureWebJobsStorage`      | Connection to Azure Storage account                |
+| `FUNCTIONS_WORKER_RUNTIME` | Which language: `dotnet`, `node`, `python`, etc    |
+| `CORS`                     | Set to `"*"` or domain names for local testing     |
+
+---
+
+## 🧠 Final Memory Tips:
+
+| Config File           | Focus On                                                                   |
+| --------------------- | -------------------------------------------------------------------------- |
+| `function.json`       | `type`, `direction`, `name`, `authLevel`, `connection`, `route`, `methods` |
+| `host.json`           | `retry`, `queues`, `serviceBus`, `http`, `functionTimeout`                 |
+| `local.settings.json` | `AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, `CORS`                  |
+
+---
