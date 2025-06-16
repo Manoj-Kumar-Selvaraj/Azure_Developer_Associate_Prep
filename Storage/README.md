@@ -321,3 +321,535 @@ This helps you:
 | Supported tool?           | Can define via **Portal, Azure CLI, ARM, or Bicep**    |
 
 ---
+
+## 📘 Azure Blob Lifecycle Rule Keywords (Full List)
+
+### 🔹 `blobTypes`
+
+* **Purpose**: Specifies which blob types this rule applies to.
+* ✅ Must be `"blockBlob"` (only supported type)
+* **Example**:
+
+  ```json
+  "blobTypes": ["blockBlob"]
+  ```
+
+---
+
+### 🔹 `prefixMatch`
+
+* **Purpose**: Apply rule to blobs under a specific folder/path.
+* **Example**: Apply rule only to blobs under `/logs/` or `/backups/`
+
+  ```json
+  "prefixMatch": ["logs/"]
+  ```
+
+---
+
+### 🔹 `daysAfterModificationGreaterThan`
+
+* **Purpose**: Trigger action X days **after blob was last modified**
+* **Common Use**: Move to cool/archive or delete
+* **Example**:
+
+  ```json
+  "tierToCool": {
+    "daysAfterModificationGreaterThan": 30
+  }
+  ```
+
+---
+
+### 🔹 `daysAfterLastAccessTimeGreaterThan`
+
+* **Purpose**: Trigger action based on **last access (read/download)**
+* **Note**: Requires **last access tracking** to be enabled on the storage account.
+* **Example**:
+
+  ```json
+  "tierToArchive": {
+    "daysAfterLastAccessTimeGreaterThan": 90
+  }
+  ```
+
+---
+
+### 🔹 `tierToCool`
+
+* **Purpose**: Move blobs to **Cool** storage tier.
+* **Used with**: `daysAfterModificationGreaterThan` or `daysAfterLastAccessTimeGreaterThan`
+* **Example**:
+
+  ```json
+  "tierToCool": {
+    "daysAfterModificationGreaterThan": 30
+  }
+  ```
+
+---
+
+### 🔹 `tierToArchive`
+
+* **Purpose**: Move blobs to **Archive** tier.
+* **Example**:
+
+  ```json
+  "tierToArchive": {
+    "daysAfterModificationGreaterThan": 90
+  }
+  ```
+
+---
+
+### 🔹 `delete`
+
+* **Purpose**: **Delete** the blob after X days.
+* **Example**:
+
+  ```json
+  "delete": {
+    "daysAfterModificationGreaterThan": 180
+  }
+  ```
+
+---
+
+### 🔹 `deleteAfterDaysSinceCreationGreaterThan`
+
+* **Purpose**: Used in **snapshot or version delete rules**, not base blob
+* **Example**:
+
+  ```json
+  "delete": {
+    "daysAfterCreationGreaterThan": 30
+  }
+  ```
+
+---
+
+### 🔹 `isEnabled`
+
+* **Purpose**: Enable or disable a lifecycle rule.
+* **Example**:
+
+  ```json
+  "enabled": true
+  ```
+
+---
+
+## ✅ Quick Cheat Table (Most Common)
+
+| Keyword                              | Meaning                        |
+| ------------------------------------ | ------------------------------ |
+| `blobTypes`                          | Must be `["blockBlob"]`        |
+| `prefixMatch`                        | Filters blobs by folder/prefix |
+| `daysAfterModificationGreaterThan`   | X days since last write/update |
+| `daysAfterLastAccessTimeGreaterThan` | X days since last read         |
+| `tierToCool`                         | Action: Move to cool tier      |
+| `tierToArchive`                      | Action: Move to archive tier   |
+| `delete`                             | Action: Delete blob            |
+| `enabled`                            | Enable or disable the rule     |
+
+---
+
+## 🧪 Bonus Tip
+
+In a real exam, they might show a JSON block and ask:
+
+> What will happen to blobs under `logs/` after 90 days?
+
+And your job is to **interpret the rule** based on these keywords.
+
+---
+
+ Can daysAfterLastAccessTimeGreaterThan be used without enabling last access tracking?
+A: ❌ No. You must enable last access time tracking on the storage account.
+
+---
+
+
+# 🔁 **Soft Delete in Azure Blob Storage**
+
+---
+
+## ✅ What is Soft Delete?
+
+> **Soft Delete** protects your data by allowing you to **recover blobs** that were **accidentally deleted or overwritten**.
+
+Think of it like a **Recycle Bin** for blobs.
+
+---
+
+## 🧩 When is Soft Delete Useful?
+
+* Accidentally deleted a file? ➜ **Recover it**
+* Blob overwritten by mistake? ➜ **Restore previous version**
+* Protection against app or user errors
+
+---
+
+## 🛠️ How It Works
+
+1. You enable **Soft Delete** on the **storage account**.
+2. You configure a **retention period** (1–365 days).
+3. When a blob is deleted:
+
+   * It's **not permanently deleted**
+   * It's marked as `deleted: true`
+   * You can **undelete it** during the retention period
+
+---
+
+## ⚙️ Example
+
+If retention is set to **7 days**, and a blob is deleted:
+
+* You can **restore** that blob **within 7 days**
+* After 7 days, it's permanently deleted
+
+---
+
+## 💬 Soft Delete Applies To:
+
+| Feature           | Supported? |
+| ----------------- | ---------- |
+| **Block blobs**   | ✅ Yes      |
+| **Append blobs**  | ✅ Yes      |
+| **Page blobs**    | ✅ Yes      |
+| **Blob versions** | ✅ Yes      |
+| **Containers**    | ✅ Yes      |
+
+---
+
+## 🧪 Enabling Soft Delete (Portal)
+
+1. Go to **Storage Account** → **Data protection**
+2. Turn on **“Enable soft delete for blobs”**
+3. Set the **retention period**
+
+---
+
+## 🧪 Enabling Soft Delete (CLI)
+
+```bash
+az storage blob service-properties delete-policy update \
+  --account-name mystorageaccount \
+  --enable true \
+  --days-retained 30
+```
+
+---
+
+## 🧠 Exam Key Points
+
+| Topic           | Detail                                                           |
+| --------------- | ---------------------------------------------------------------- |
+| Default         | **Disabled** by default                                          |
+| Retention Range | **1–365 days**                                                   |
+| Recovery        | You can restore using **Azure Portal, CLI, PowerShell, or SDKs** |
+| Related Feature | Works with **blob versioning** for even better protection        |
+
+---
+
+## 👨‍🏫 Exam Tip:
+
+You may get questions like:
+
+> You enabled Soft Delete with 30 days retention. A blob was deleted 20 days ago. Can you recover it?
+
+✔️ **Yes** — still within retention
+✖️ **No**, if after 30 days
+
+---
+
+Thanks! Let's review your answers and explanations — you're doing great!
+
+---
+
+### ✅ **1. `c) It is stored with a unique version ID`** — ✔️ Correct
+
+* When blob versioning is enabled, every **overwrite or delete operation** creates a **new version**, and the previous one is **preserved with a version ID**.
+
+---
+
+### ✅ **2. `a) Block blobs only`** — ✔️ Correct
+
+* **Only block blobs** support versioning.
+* Page blobs and append blobs are **not supported** for this feature.
+
+---
+
+### ✅ **3. `c) Use the blob’s version ID`** — ✔️ Correct
+
+* To **access** or **restore** a specific version, you must specify the **version ID** in SDKs, CLI, or REST APIs.
+
+---
+
+### ❌ **4. `a) Enabled by default`** — ❌ Incorrect
+
+* ✅ **Correct answer:** `c) Disabled by default and must be enabled manually`
+* Blob versioning is **not enabled** by default — you need to **explicitly enable** it through Azure CLI, Portal, or ARM.
+
+---
+
+### ✅ **5. `c) The current blob is marked as deleted, older versions are retained`** — ✔️ Correct
+
+* If you delete a blob while versioning is enabled, Azure **marks the current version as deleted** but **retains all previous versions** for recovery.
+
+---
+ Exam Tips
+✅ Policies apply at the container level, not individual blob (unless versioning is enabled).
+
+✅ You cannot delete a container with a locked immutable policy.
+
+✅ Only blob versioning allows per-version WORM policies
+
+✅ Legal hold has no expiration, removed manually
+
+✅ CORS is only relevant for browser-based code accessing Azure Storage.
+
+❌ CORS is not enforced for backend/server tools or for direct user navigation.
+
+Browser + JavaScript code ⇒ 🔐 CORS is required
+
+Anything else (user click, server code, curl) ⇒ ❌ CORS not required
+
+| Access Method                                                    | Needs CORS? | Why?                                                                            |
+| ---------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| 🔗 **User clicks blob URL in browser** (e.g., direct download)   | ❌ **No**    | This is a **regular HTTP request**, not an AJAX request. CORS is not triggered. |
+| ⚙️ **JavaScript (AJAX/fetch/XHR) in browser** accessing blob URL | ✅ **Yes**   | The browser enforces **CORS** when your JS code makes cross-origin calls.       |
+| 🧪 **Postman / curl / server-side Python, Node.js, etc.**        | ❌ **No**    | These are **not restricted by browser CORS policies**.                          |
+| ⚙️ **JavaScript accessing blob via custom domain (CDN, CNAME)**  | ✅ **Yes**   | Still a browser-to-browser-origin mismatch.                                     |
+
+Excellent work! Let's go through each answer with explanations so you're 100% exam-ready. 🔥
+
+---
+
+## ✅ Your Answers:
+
+`1.b, 2.a, 3.c, 4.b, 5.b`
+
+---
+
+### **1. You're building a JavaScript SPA hosted on `https://myapp.com` that fetches images from Azure Blob Storage. The request fails. What is MOST LIKELY missing?**
+
+✔️ **Your Answer: b) CORS is not configured for `https://myapp.com`**
+✅ **Correct**
+
+* JavaScript apps making cross-origin requests (like from `myapp.com` to `blob.core.windows.net`) **need CORS configured** in Azure Blob Storage.
+* The browser blocks it otherwise.
+
+🧠 **Key Rule**: Browser-to-blob via JS = needs CORS.
+
+---
+
+### **2. Which services in Azure Storage support CORS?**
+
+✔️ **Your Answer: a) Blob**
+❌ **Partial Credit**
+
+✅ **Correct Answer: a) Blob, b) File, c) Queue, d) Table**
+
+All four services support CORS, although Table is less commonly used now.
+
+💡 **Tip**: If a service can be accessed over HTTP from a browser app, it likely supports CORS.
+
+---
+
+### **3. You're using `fetch()` in JavaScript to retrieve a blob from Azure. The request is blocked by CORS. What should you check?**
+
+✔️ **Your Answer: c) That the allowed origins and methods include your domain and HTTP verb**
+✅ **Correct**
+
+* For a CORS rule to work:
+
+  * Your domain (`https://myapp.com`) must be listed in **Allowed Origins**
+  * The HTTP method (`GET`, `POST`, etc.) must be listed in **Allowed Methods**
+
+🧠 Browsers do a **preflight OPTIONS request** to check this before letting your `fetch()` go through.
+
+---
+
+### **4. You're setting CORS via CLI and want to allow any domain to access the Blob Storage for GET requests. Which origin value should you use?**
+
+✔️ **Your Answer: b) `*`**
+✅ **Correct**
+
+* The wildcard `"*"` allows **all origins**, but note:
+
+  * You **cannot use `"*"`** if you want to **allow credentials** (`withCredentials: true`).
+  * It’s fine for public blobs and anonymous access.
+
+---
+
+### **5. Which of the following requests does NOT require CORS?**
+
+✔️ **Your Answer: b) A user clicking a direct download link to a blob URL**
+✅ **Correct**
+
+* Clicking a direct link is just a **regular HTTP request**, not a JS-initiated cross-origin request.
+* No JavaScript = No CORS check.
+
+---
+
+Awesome! Let's dive into **Azure Storage Encryption**, another critical concept for the **AZ-204 exam** and for securing your applications in real-world deployments. 🔐
+
+---
+
+## 🔐 **Azure Storage Encryption Overview**
+
+---
+
+### ✅ What is it?
+
+> Azure Storage **automatically encrypts** all data before persisting it and **decrypts** it when you access it — all transparently.
+
+This is called **Storage Service Encryption (SSE)**.
+
+---
+
+## ⚙️ **Types of Encryption in Azure Storage**
+
+### 🔹 1. **SSE with Microsoft-Managed Keys (SSE-MMK)**
+
+✅ Default option
+🔒 Microsoft handles all key rotation and management
+📦 No setup needed
+
+---
+
+### 🔹 2. **SSE with Customer-Managed Keys (SSE-CMK)**
+
+🔑 You provide and manage your own encryption keys using **Azure Key Vault**
+⚠️ You are responsible for key rotation, access policies, etc.
+🎯 Often used in regulated industries
+
+---
+
+### 🔹 3. **SSE with Customer-Provided Keys (SSE-CPK)**
+
+🧾 You send the key with each request (via REST API or SDK)
+📦 Key is not stored by Azure
+🔒 Only used for **Blob Storage**
+⚠️ You must handle key generation, transfer, and security
+
+---
+
+## 🧪 Summary Table
+
+| Feature                     | SSE-MMK               | SSE-CMK                | SSE-CPK               |
+| --------------------------- | --------------------- | ---------------------- | --------------------- |
+| Key managed by              | Microsoft             | You (via Key Vault)    | You (per-request)     |
+| Supports automatic rotation | ✅                     | ❌ (you manage)         | ❌                     |
+| Use case                    | Default, general      | Regulated data, audits | Extreme control needs |
+| Blob-only?                  | ❌ (All storage types) | ❌ (All storage types)  | ✅ (Blob only)         |
+
+---
+
+### ✅ Encryption in Transit
+
+* Azure **also encrypts data in transit** using HTTPS/TLS.
+* You must **always use HTTPS endpoints** when sending/receiving data.
+
+---
+
+### 💡 Additional Notes
+
+* Azure Storage **never stores unencrypted data at rest**
+* You can enforce HTTPS-only access at the **Storage Account level**
+* Encryption is enabled by default — you **can’t turn it off**
+
+---
+
+## 👨‍🏫 Exam Tips
+
+* ✅ Know that **encryption at rest is automatic and enabled by default**
+* ✅ Understand the difference between **SSE-MMK, SSE-CMK, and SSE-CPK**
+* ❌ You don’t need to implement encryption logic — unless using **SSE-CPK**
+* ✅ For CMK, Key Vault is mandatory
+* ✅ CPK is **not supported** with Azure Data Lake Gen2
+
+---
+
+❌ Incorrect
+Correct Answer: b. Can set expiration centrally
+Stored access policies allow centralized control (e.g., start/end time, permissions) for multiple SAS tokens, enabling easy revocation or update.
+Not limited to Azure CLI.
+
+❌ Incorrect
+Correct Answer: b. Strong Consistency
+Azure Blob Storage guarantees strong consistency — every read returns the most recent committed write.
+
+❌ Incorrect
+Correct Answer: d. Azure Service Bus (with sessions)
+Azure Queue Storage does not guarantee FIFO, while Service Bus with sessions supports FIFO with strict message ordering.
+
+✅ Correct
+Answer: a, b
+Premium storage provides high throughput and low latency, great for IOPS-intensive workloads.
+❌ Not the cheapest for cold data.
+
+❌ Incorrect
+Correct Answer: d. This is not natively supported in Azure Storage
+Azure doesn't support native container-level quotas. You must monitor usage externally and take action.
+
+❌ Incorrect
+Correct Answer: b. In the $web container
+For static websites hosted on Azure Blob, you must use the $web container.
+
+Excellent — those two areas are **frequently tested** in the AZ-204 exam and are **confusingly similar**, so let’s break them down **clearly and precisely**.
+
+---
+
+## ⚙️ **Event Grid vs Queue Storage vs Service Bus**
+
+| Feature                             | **Event Grid**                                                        | **Queue Storage**                                                 | **Service Bus**                            |
+| ----------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
+| **Type**                            | Eventing (Push-based, pub-sub)                                        | Messaging (Pull-based)                                            | Enterprise Messaging (Advanced)            |
+| **Use Case**                        | Notify multiple subscribers when an event occurs (e.g., blob created) | Pass messages between apps (e.g., decoupling producers/consumers) | Reliable, ordered, transactional messaging |
+| **Trigger Pattern**                 | **Push** (event-driven)                                               | **Pull** (client must poll)                                       | **Push + Pull** (subscription-based)       |
+| **Supports Dead-lettering?**        | ❌ No                                                                  | ✅ Yes (limited)                                                   | ✅ Yes (rich features)                      |
+| **Message Ordering**                | ❌ No guarantee                                                        | ❌ No guarantee                                                    | ✅ Yes (with sessions)                      |
+| **Retries / DLQ?**                  | Automatic retry with backoff                                          | Manual retry logic needed                                         | Built-in retry and DLQ                     |
+| **Typical Message Size**            | Small (events, JSON: < 1 MB)                                          | Max 64 KB                                                         | Max 256 KB (standard), 100 MB (premium)    |
+| **Fan-out? (Multiple subscribers)** | ✅ Yes                                                                 | ❌ No                                                              | ✅ Yes (via topics)                         |
+| **Latency**                         | Millisecond scale                                                     | Moderate                                                          | Low, optimized for reliability             |
+| **Azure Integration**               | Storage, Logic Apps, Functions, etc.                                  | Functions, WebJobs                                                | Functions, Logic Apps, Enterprise Systems  |
+
+### 🔧 Real-World Analogy:
+
+* **Event Grid** → *Doorbell* → Triggers action when someone presses it
+* **Queue Storage** → *To-do list* → You check it regularly to see what to do
+* **Service Bus** → *Registered mail with tracking* → Guaranteed delivery, order, retries
+
+---
+
+## 📂 **Immutability Policies vs Snapshots vs Versioning**
+
+| Feature                | **Immutability Policy**                              | **Snapshot**                        | **Versioning**                          |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------- | --------------------------------------- |
+| **Purpose**            | Enforce **compliance** (WORM: Write Once, Read Many) | **Manual backup** of blob           | **Auto backup** after changes           |
+| **Mutable?**           | ❌ Cannot modify or delete during lock period         | ✅ Can delete or overwrite           | ✅ Can delete versions                   |
+| **Use Case**           | Regulatory retention (e.g., finance, healthcare)     | Restore manually created state      | Auto recovery from accidental overwrite |
+| **Activation**         | Must configure policy & retention period             | Call `snapshot` API manually        | Enabled at the storage account level    |
+| **Cost Impact**        | Retention incurs storage cost                        | Snapshot incurs cost (differential) | Versions stored cost per GB             |
+| **Visible in Portal?** | ✅ Yes (under blob > immutability)                    | ✅ Yes (under blob > snapshots)      | ✅ Yes (under blob > versions)           |
+| **Granularity**        | Container or blob level                              | Per blob                            | Per blob                                |
+| **Can be locked?**     | ✅ Yes (legal hold / time-based lock)                 | ❌ No                                | ❌ No                                    |
+
+### 🧠 Quick Summary:
+
+* **Immutability**: “I’m legally not allowed to change this blob for 7 years.”
+* **Snapshot**: “Let me take a manual backup right now.”
+* **Versioning**: “Every time I change this file, keep a copy.”
+
+---
+
+### ✅ You Should Master:
+
+* When to use **Queue Storage** vs **Service Bus** vs **Event Grid**
+* When to use **immutability** for compliance vs **snapshots** for backup vs **versioning** for overwrite recovery
+
+---
