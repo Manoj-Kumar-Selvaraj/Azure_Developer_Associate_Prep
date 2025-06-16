@@ -213,6 +213,111 @@ resource stg 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 When you store a blob in the Archive tier, the blob becomes offline — you cannot read or modify it until it’s moved back to an online tier (Hot or Cool).
 This process is called rehydration.
 
+---
 
+Great! Let’s move on to the **next major Azure Storage topic**:
+
+---
+
+## 🔄 **Azure Blob Lifecycle Management**
+
+This is a powerful and exam-relevant feature — also extremely useful in real-world cost optimization.
+
+---
+
+## 🧠 What is Lifecycle Management?
+
+> **Automatically move or delete blobs** based on **rules you define** (age, access, etc.)
+
+This helps you:
+
+* Reduce storage **costs**
+* Retain data only as long as needed
+* Clean up old or unused blobs
+
+---
+
+## 🔁 Example Scenarios
+
+| Scenario                              | Action                                       |
+| ------------------------------------- | -------------------------------------------- |
+| Delete blobs 30 days after upload     | `if blob age > 30 days → delete`             |
+| Move logs to cool tier after 7 days   | `if blob age > 7 days → move to cool`        |
+| Archive blobs not accessed in 90 days | `if last access > 90 days → move to archive` |
+
+---
+
+## 🧩 Storage Tiers Refresher
+
+| Tier        | Use Case                         | Cost Model                                                |
+| ----------- | -------------------------------- | --------------------------------------------------------- |
+| **Hot**     | Frequently accessed data         | High storage, low access cost                             |
+| **Cool**    | Infrequently accessed (30+ days) | Lower storage, higher access                              |
+| **Archive** | Rarely accessed (180+ days)      | Very cheap storage, expensive access (rehydration needed) |
+
+---
+
+## ⚙️ How to Use Lifecycle Management
+
+1. Go to your **Storage Account** in Azure Portal
+2. Navigate to **"Lifecycle management"**
+3. Click **“+ Add a rule”**
+4. Define:
+
+   * **Filters** (by blob name prefix, container, tag)
+   * **Conditions** (e.g., age > 30 days)
+   * **Action** (move to cool/archive, delete)
+
+---
+
+## 🧪 Sample Rule (XML-style logic)
+
+```json
+{
+  "rules": [
+    {
+      "name": "move-logs-to-cool",
+      "enabled": true,
+      "type": "Lifecycle",
+      "definition": {
+        "filters": {
+          "blobTypes": ["blockBlob"],
+          "prefixMatch": ["logs/"]
+        },
+        "actions": {
+          "baseBlob": {
+            "tierToCool": {
+              "daysAfterModificationGreaterThan": 7
+            },
+            "delete": {
+              "daysAfterModificationGreaterThan": 30
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 🎯 Benefits
+
+✅ **Cost-efficient**: Automatically archives or deletes unused data
+✅ **Set and forget**: Runs in the background
+✅ **Customizable**: Target specific containers, files, or blob types
+
+---
+
+## 📌 Notes for the AZ-204 Exam
+
+| Topic                     | Key Points                                             |
+| ------------------------- | ------------------------------------------------------ |
+| Lifecycle policy triggers | Based on **modification date** or **last access date** |
+| Applicable blob types     | Only **Block Blobs** (not Append/Page blobs)           |
+| Tiers you can move to     | Hot → Cool → Archive                                   |
+| Rehydration required?     | Yes, if you move data from **Archive → Cool/Hot**      |
+| Supported tool?           | Can define via **Portal, Azure CLI, ARM, or Bicep**    |
 
 ---
