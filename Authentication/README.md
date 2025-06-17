@@ -5,13 +5,14 @@
 ### 🔹 **1. Azure Entra Overview**
 
 * What is Azure Entra?
+
 ---
     Azure Entra is Microsoft's modern identity and access management (IAM) solution. It includes tools to manage:
-    Who can access
+      Who can access?
 
-    What they can access
+      What they can access?
 
-    When and under what conditions
+      When and under what conditions?
 ---
 
 * Why Microsoft renamed Azure AD to Entra?
