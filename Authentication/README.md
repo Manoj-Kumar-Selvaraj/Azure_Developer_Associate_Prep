@@ -50,6 +50,160 @@
 
 ### 🔹 **2. Azure Entra ID (formerly Azure Active Directory)**
 
+Excellent choice! Let’s dive into:
+
+---
+
+## 🔹 **2. Azure Entra ID (formerly Azure Active Directory)**
+
+This is the **core service** within Entra that handles **identity and access** for users, devices, applications, and more.
+
+---
+
+### ✅ **Key Concepts You Must Master in Azure Entra ID**
+
+---
+
+### 🔸 **A. Tenants and Directories**
+
+| Term                  | Meaning                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Tenant**            | A dedicated, isolated instance of Azure Entra ID service (like your private directory in the cloud). |
+| **Directory**         | Holds users, groups, apps, devices. One directory = one tenant.                                      |
+| **Default Directory** | Created when you first sign up with Microsoft services (like M365, Azure).                           |
+| **Tenant ID**         | A unique GUID for your tenant used in app registrations and configurations.                          |
+
+🔹 **Example**:
+You sign up for Azure → Microsoft creates a tenant like `manojkumar.onmicrosoft.com` → This is your **Azure Entra Directory**.
+
+---
+
+### 🔸 **B. Core Objects in Azure Entra**
+
+| Object Type            | Examples                      | Purpose                            |
+| ---------------------- | ----------------------------- | ---------------------------------- |
+| **Users**              | Admins, employees, guests     | Who signs in                       |
+| **Groups**             | Security / M365 groups        | Manage access                      |
+| **Devices**            | Laptops, phones               | For compliance, conditional access |
+| **Service Principals** | App identities                | Auth for apps                      |
+| **Roles**              | Admin roles (e.g. User Admin) | Control permissions                |
+
+---
+
+### 🔸 **C. Users**
+
+* **Create Users**: Portal, PowerShell, CLI
+* **User Types**:
+
+  * **Member**: Internal employee
+  * **Guest**: External B2B partner
+* **Properties**: Name, email, usage location, job title
+* **Lifecycle**:
+
+  * Create → Assign roles/groups → Use → Disable/Delete
+
+🔹 You can also **bulk create users** using CSV or script.
+
+---
+
+### 🔸 **D. Groups**
+
+* **Types**:
+
+  * **Security Group**: For permissions
+  * **Microsoft 365 Group**: Adds Teams, SharePoint, etc.
+* **Membership**:
+
+  * **Assigned**: Manually add members
+  * **Dynamic**: Add members based on rules (e.g., department = "IT")
+
+🔹 Example Rule:
+
+```plaintext
+(user.department -eq "IT")
+```
+
+* Use groups for **RBAC**, **Conditional Access**, and **Licensing**.
+
+---
+
+### 🔸 **E. Authentication Methods**
+
+| Method                             | Description                                    |
+| ---------------------------------- | ---------------------------------------------- |
+| Password                           | Default                                        |
+| **MFA** (Text, App, Hardware)      | Stronger, required for secure access           |
+| Temporary Access Pass (TAP)        | One-time code for onboarding                   |
+| Passwordless                       | FIDO2 keys, Authenticator app                  |
+| Self-Service Password Reset (SSPR) | User-initiated reset with verification methods |
+
+---
+
+### 🔸 **F. Azure Entra Roles & Admin Units**
+
+* **Roles**:
+  Predefined roles like:
+
+  * **Global Administrator**
+  * **User Administrator**
+  * **Groups Administrator**
+
+* **Admin Units** (like OUs in on-prem AD):
+  Delegate admin rights to a **subset** of users/groups/devices.
+
+---
+
+### 🔸 **G. Device Registration & Management**
+
+* Devices can be:
+
+  * **Azure AD Registered**: BYOD (personal device)
+  * **Azure AD Joined**: Corporate-owned
+  * **Hybrid Azure AD Joined**: On-prem + Entra
+
+🔹 Important for **Conditional Access**, **Intune**, **Compliance**
+
+---
+
+### 🔸 **H. Licensing Overview**
+
+| Feature                        | Free | P1 | P2 |
+| ------------------------------ | ---- | -- | -- |
+| Basic SSO, MFA                 | ✅    | ✅  | ✅  |
+| Conditional Access             | ❌    | ✅  | ✅  |
+| Identity Protection            | ❌    | ❌  | ✅  |
+| PIM (Privileged Identity Mgmt) | ❌    | ❌  | ✅  |
+| Dynamic Groups                 | ❌    | ✅  | ✅  |
+
+---
+
+### 🧠 Quick Diagram – Azure Entra ID Core Structure
+
+```
+                 +-----------------------------+
+                 |    Azure Entra Directory    |
+                 +-----------------------------+
+                        /      |       \
+                 Users   Groups   Devices
+                   |       |        |
+                 MFA    Licenses   CA Policies
+```
+
+---
+
+### 📌 Summary
+
+| Topic                    | Covered |
+| ------------------------ | ------- |
+| Tenants & Directories    | ✅       |
+| Users & Groups           | ✅       |
+| Auth Methods (MFA, SSPR) | ✅       |
+| Roles & Admin Units      | ✅       |
+| Devices                  | ✅       |
+| Licensing                | ✅       |
+
+---
+
 #### 🔸 Basics
 
 * Tenants and directories
