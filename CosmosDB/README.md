@@ -296,3 +296,156 @@ This joins each array item with the parent document.
 * **Use `VALUE`** when you want a scalar (like `COUNT`, `AVG`, etc.)
 
 ---
+
+## ✅ PHASE 4: Partitioning & Scaling in Cosmos DB
+
+---
+
+### 🔹 What is Partitioning?
+
+Partitioning allows Cosmos DB to **scale horizontally** by distributing data across multiple **physical partitions**.
+
+> Think of it like splitting a large warehouse into small rooms, each holding a part of your data.
+
+---
+
+### 🔹 Key Concepts
+
+| Term                   | Description                                                          |
+| ---------------------- | -------------------------------------------------------------------- |
+| **Logical Partition**  | All documents that share the same partition key value                |
+| **Physical Partition** | Internal storage unit managed by Cosmos DB                           |
+| **Partition Key**      | The field you choose (like `/city` or `/userId`) to divide your data |
+| **Partition Range**    | Cosmos DB routes requests based on this key                          |
+
+---
+
+### 📌 Why Partition Key Matters
+
+Your **partition key** affects:
+
+* Performance ⚡️
+* Cost 💰
+* Scalability ⬆️
+* Query speed 🔍
+
+---
+
+### 🔍 Example
+
+#### Example 1: Good Partitioning
+
+```json
+{
+  "id": "1",
+  "city": "Chennai",
+  "name": "Manoj"
+}
+```
+
+Partition key: `/city`
+
+✅ If you have users from 100 cities → data gets distributed.
+
+#### Example 2: Bad Partitioning
+
+```json
+{
+  "id": "1",
+  "type": "fixed"
+}
+```
+
+Partition key: `/type` (only 1–2 values)
+
+❌ All data goes to one partition → **hot partition**, poor performance.
+
+---
+
+### 📏 How to Choose a Good Partition Key
+
+| Good Key                 | Bad Key                                |
+| ------------------------ | -------------------------------------- |
+| `/userId`, `/customerId` | `/country` (if all data is from India) |
+| `/deviceId`              | `/status` (only "open", "closed")      |
+| `/orderId`               | `/type` (only a few values)            |
+
+✅ Choose a field that:
+
+* Has high **cardinality** (many unique values)
+* Is **used in queries**
+* **Balances** data evenly
+
+---
+
+### 🔹 What are Request Units (RUs)?
+
+Every operation (read, write, query) in Cosmos DB **consumes RUs**.
+
+| Operation                  | Avg RU      |
+| -------------------------- | ----------- |
+| Read a 1 KB item           | \~1 RU      |
+| Write a 1 KB item          | \~5 RUs     |
+| Complex query with filters | 10–100+ RUs |
+
+> 💡 RU is like **money** in Cosmos DB — you “spend” it per operation.
+
+---
+
+### ⚖️ Throughput Modes
+
+| Mode                       | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| **Provisioned throughput** | You specify RU/s (e.g., 400 RU/s)                 |
+| **Autoscale**              | Scales between 10–100× of base RU/s automatically |
+
+#### Example:
+
+* You set Autoscale with max = 1000 RU/s
+* Cosmos auto-scales between 100–1000 RU/s depending on usage
+
+---
+
+### ⚠️ RU Troubleshooting Tips
+
+| Problem                    | Fix                                  |
+| -------------------------- | ------------------------------------ |
+| High RU consumption        | Check large documents, use filters   |
+| Query scans all partitions | Always filter by **partition key**   |
+| RU spikes during peak      | Use **autoscale mode**               |
+| “429 Too Many Requests”    | Increase RU/s or reduce request rate |
+
+---
+
+### 🔧 Monitoring RU Usage
+
+Go to your Cosmos DB account > **Insights** > **Requests and Capacity**:
+
+* Monitor **Consumed RU/s**
+* View throttling (429 errors)
+* Set **alerts** if needed
+
+---
+
+### ✅ Summary of Phase 4
+
+| ✅ You Now Understand                       |
+| ------------------------------------------ |
+| What partitioning is and why it’s critical |
+| How to choose a proper partition key       |
+| What RU/s are and how they impact cost     |
+| How to scale manually or using autoscale   |
+| How to fix high RU or hot partition issues |
+
+---
+
+### 💡 Best Practice Cheatsheet
+
+| Task                 | Tip                                                 |
+| -------------------- | --------------------------------------------------- |
+| Design partition key | Use high-cardinality field, avoid skew              |
+| Optimize queries     | Always use partition key in WHERE clause            |
+| Control cost         | Monitor RU/s, use autoscale, minimize large queries |
+| Avoid hot partitions | Don't use keys with few values (e.g., `status`)     |
+
+---
