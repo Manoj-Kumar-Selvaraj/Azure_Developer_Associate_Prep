@@ -449,3 +449,4 @@ Go to your Cosmos DB account > **Insights** > **Requests and Capacity**:
 | Avoid hot partitions | Don't use keys with few values (e.g., `status`)     |
 
 ---
+
