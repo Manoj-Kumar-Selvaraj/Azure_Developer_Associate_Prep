@@ -454,6 +454,9 @@ az webapp log download \
 | Key Vault Ref Syntax       | `@Microsoft.KeyVault(SecretUri=...)`         |         |
 | Assign Managed Identity    | `az webapp identity assign`                  |         |
 
+	Autoscale configs are stored as Azure Monitor + ARM resource settings — not in web.config.
+
+  Every 5 mins, one scale-out = 4 cycles in 20 mins → 4 instances → capped at 5 total.
 
 ## 💡 AZ-204 Exam Traps & Tricks
 
