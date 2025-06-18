@@ -432,6 +432,29 @@ az webapp log download \
 
 ---
 
+| Missed Q | Explanation                                                                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q3       | The `.deployment` file is useful for Kudu-based deployments, **not required** for GitHub Actions. The key issue here is **no startup command defined**, especially for Python or Node.js apps deployed via Docker or custom builds. |
+
+
+| Feature                 | Key Cmd                                                 |
+| ----------------------- | ------------------------------------------------------- |
+| Force HTTPS             | `az webapp update --https-only true`                    |
+| Set TLS Version         | `az webapp config set --min-tls-version 1.2`            |
+| App Settings            | `az webapp config appsettings set --settings KEY=VALUE` |
+| Assign Managed Identity | `az webapp identity assign`                             |
+| Key Vault reference     | `@Microsoft.KeyVault(...)`                              |
+| Bind SSL cert           | `az webapp config ssl bind`                             |
+
+| Concept                    | Command/Fact                                 |         |
+| -------------------------- | -------------------------------------------- | ------- |
+| Force HTTPS                | `az webapp update --https-only true`         |         |
+| TLS Version                | `az webapp config set --min-tls-version 1.2` |         |
+| App Runtime (Python, Node) | \`--linux-fx-version "PYTHON                 | 3.10"\` |
+| Key Vault Ref Syntax       | `@Microsoft.KeyVault(SecretUri=...)`         |         |
+| Assign Managed Identity    | `az webapp identity assign`                  |         |
+
+
 ## 💡 AZ-204 Exam Traps & Tricks
 
 | Scenario                           | Correct Feature               |
