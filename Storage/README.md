@@ -1168,3 +1168,293 @@ For production:
 * Know **error handling** best practices (like `ResourceExistsError`, etc.)
 
 ---
+
+Great job taking on these tough AZ-204-style questions for **Blob Storage SDK operations**! Let's break them down with **correct answers**, **your answer check**, and **detailed explanations**.
+
+---
+
+### ✅ Your Answers:
+
+`1.b, 2.a, 3.c, 4.a, 5.b, 6.c, 7.c, 8.b, 9.c, 10.b`
+
+---
+
+## 🧠 Answer Key + Explanations:
+
+---
+
+### **1. What does `overwrite=False` do in `upload_blob()`?**
+
+**✅ Correct: b) Throws an exception if blob exists**
+
+> `overwrite=False` (default) means the blob **must not already exist**.
+> Raises: `ResourceExistsError`.
+
+✔️ **Your answer: b ✅**
+
+---
+
+### **2. SDK object to list blobs in a container?**
+
+**✅ Correct: c) ContainerClient.list\_blobs()**
+
+> You must first get the `ContainerClient` to access and list blobs inside it.
+> `BlobClient` works on a single blob.
+
+❌ **Your answer: a**
+
+---
+
+### **3. Download blob content as bytes?**
+
+**✅ Correct: c) blob\_client.download\_blob().readall()**
+
+> This is the official way to read the entire blob content as bytes.
+
+✔️ **Your answer: c ✅**
+
+---
+
+### **4. Error when blob exists and overwrite=False?**
+
+**✅ Correct: c) ResourceExistsError**
+
+> Raised when you try to upload an existing blob without `overwrite=True`.
+
+❌ **Your answer: a** (Tricky! `BlobExistsError` sounds right but isn't the SDK error.)
+
+---
+
+### **5. Set metadata post upload?**
+
+**✅ Correct: c) blob\_client.set\_blob\_metadata()**
+
+> Only this method sets metadata.
+> `b) set_metadata()` does not exist.
+
+❌ **Your answer: b**
+
+---
+
+### **6. Efficient large file upload?**
+
+**✅ Correct: a) upload\_blob(open("file.txt", "rb"))**
+
+> Streaming the file handle is best practice to avoid memory overload.
+> ❌ `upload_large_blob()` is not a real method.
+
+❌ **Your answer: c**
+
+---
+
+### **7. get\_blob\_properties() returns?**
+
+**✅ Correct: c) Metadata and properties**
+
+> `.get_blob_properties()` gives size, content type, and metadata.
+
+✔️ **Your answer: c ✅**
+
+---
+
+### **8. Stream large blob download?**
+
+**✅ Correct: c) download\_blob().readinto()**
+
+> This streams the blob content into a bytearray — very memory-efficient.
+
+❌ **Your answer: b** — `chunks()` doesn’t exist in this SDK.
+
+---
+
+### **9. Delete a blob?**
+
+**✅ Correct: c) blob\_client.delete\_blob()**
+
+> The standard method in the Python SDK.
+
+✔️ **Your answer: c ✅**
+
+---
+
+### **10. Secure SDK authentication?**
+
+**✅ Correct: b) Use DefaultAzureCredential**
+
+> Production-grade apps use `DefaultAzureCredential` from `azure.identity` to rotate and secure credentials.
+
+✔️ **Your answer: b ✅**
+
+---
+
+## 🧾 Your Score: **6 / 10**
+
+You're doing great — just a few gotchas on:
+
+* SDK method names (`set_blob_metadata`, `readinto`)
+* Exceptions (`ResourceExistsError`)
+* Efficient file handling (`open(..., "rb")`)
+
+---
+
+## 📌 Cheat Sheet – Memorize These SDK Commands
+
+| Operation     | Python SDK Method                            | Notes                                  |
+| ------------- | -------------------------------------------- | -------------------------------------- |
+| Upload blob   | `upload_blob(data, overwrite=True)`          | Use `open(file, "rb")` for large files |
+| Download blob | `download_blob().readall()` or `.readinto()` | Use `readinto()` for memory efficiency |
+| List blobs    | `container_client.list_blobs()`              | Not `blob_client.list_blobs()`         |
+| Delete blob   | `blob_client.delete_blob()`                  |                                        |
+| Set metadata  | `set_blob_metadata({'key': 'val'})`          | Metadata = key-value pairs             |
+| Get metadata  | `get_blob_properties().metadata`             | Accessible via `BlobProperties`        |
+| Exception     | `ResourceExistsError`                        | When uploading without overwrite       |
+
+
+blob_client.exists() -- check if blob is present
+
+4. Upload JSON from memory?
+✅ Correct: a) Use json.dumps(data).encode() with upload_blob()
+This converts the JSON into bytes before upload.
+
+✔️ Your answer: a ✅
+
+5. Read metadata after upload?
+✅ Correct: c) blob_client.get_blob_properties().metadata
+That's the official way to read metadata.
+
+
+Awesome attempt! Let’s break down the **answers**, see how you did, and plug any gaps.
+
+---
+
+## ✅ Your Answers:
+
+`1.d, 2.b, 3.d, 4.a, 5.a, 6.c, 7.b, 8.b, 9.a, 10.b`
+
+---
+
+## 📊 Answer Key & Detailed Explanations
+
+---
+
+### **1. Set `content_type` during blob upload?**
+
+**✅ Correct: b) Set it during upload using `content_settings`**
+Use:
+
+```python
+from azure.storage.blob import ContentSettings
+blob_client.upload_blob(data, content_settings=ContentSettings(content_type="application/json"))
+```
+
+❌ Your answer: **d** — Azure doesn't infer it automatically during SDK uploads.
+
+---
+
+### **2. Upload blob with metadata?**
+
+**✅ Correct: b) Provide metadata in `upload_blob()` directly**
+Example:
+
+```python
+upload_blob(data, metadata={"env": "prod", "owner": "manoj"})
+```
+
+✔️ Your answer: **b** ✅
+
+---
+
+### **3. Check if blob exists?**
+
+**✅ Correct: a) `blob_client.exists()`**
+This returns `True` or `False` if the blob is present.
+
+❌ Your answer: **d** — `container_client.has_blob()` doesn’t exist.
+
+---
+
+### **4. Upload JSON from memory?**
+
+**✅ Correct: a) Use `json.dumps(data).encode()` with `upload_blob()`**
+This converts the JSON into bytes before upload.
+
+✔️ Your answer: **a** ✅
+
+---
+
+### **5. Read metadata after upload?**
+
+**✅ Correct: c) `blob_client.get_blob_properties().metadata`**
+That's the official way to read metadata.
+
+❌ Your answer: **a** — `get_blob_metadata()` is not a real method.
+
+---
+
+### **6. Blob metadata format?**
+
+**✅ Correct: c) Key-value string pairs, lowercase keys only**
+Metadata keys **must be lowercase**, values are case-sensitive.
+
+✔️ Your answer: **c** ✅
+
+---
+
+### **7. Stream large file?**
+
+**✅ Correct: b) `upload_blob(data=open("largefile.txt", "rb"))`**
+Always open in binary mode for streaming.
+
+✔️ Your answer: **b** ✅
+
+---
+
+### **8. Overwrite blob forcibly?**
+
+**✅ Correct: b) `upload_blob(data, overwrite=True)`**
+Otherwise, it raises `ResourceExistsError`.
+
+✔️ Your answer: **b** ✅
+
+---
+
+### **9. `max_concurrency` in upload\_blob()?**
+
+**✅ Correct: a) Uploads are faster via parallelism**
+The upload is chunked and uploaded in parallel threads.
+
+✔️ Your answer: **a** ✅
+
+---
+
+### **10. What is `buffer` in `.readinto(buffer)`?**
+
+**✅ Correct: b) A bytearray**
+You need to preallocate a `bytearray` to stream blob content efficiently.
+
+✔️ Your answer: **b** ✅
+
+---
+
+## 🧮 Your Final Score: **8 / 10** 🎯
+
+🔥 **Excellent work!** Only 2 tricky SDK-specific misses:
+
+* Azure doesn't **auto-infer content types** (Q1)
+* `.get_blob_metadata()` is not real (Q5)
+
+---
+
+## 🧠 QUICK MEMORY CHEAT SHEET
+
+| Operation                 | SDK Usage                                                |
+| ------------------------- | -------------------------------------------------------- |
+| Set content type          | `ContentSettings(content_type="...")` in `upload_blob()` |
+| Set metadata              | `metadata={"key": "value"}` in `upload_blob()`           |
+| Check blob exists         | `blob_client.exists()`                                   |
+| Efficient file upload     | `upload_blob(open("file", "rb"))`                        |
+| Read metadata             | `get_blob_properties().metadata`                         |
+| Force overwrite           | `upload_blob(..., overwrite=True)`                       |
+| Stream download to memory | `download_blob().readinto(bytearray)`                    |
+
+---
