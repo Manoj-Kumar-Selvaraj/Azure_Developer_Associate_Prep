@@ -853,3 +853,240 @@ Excellent — those two areas are **frequently tested** in the AZ-204 exam and a
 * When to use **immutability** for compliance vs **snapshots** for backup vs **versioning** for overwrite recovery
 
 ---
+
+## ✅ **2.2 – Develop Solutions Using Azure Blob Storage**
+
+### Now covering: **2.2.1 – Set and Retrieve Properties and Metadata**
+
+---
+
+### 🔹 Blob Properties vs Metadata — What’s the Difference?
+
+| Feature       | **Properties**                        | **Metadata**                            |
+| ------------- | ------------------------------------- | --------------------------------------- |
+| **Built-in?** | ✅ Yes (default)                       | ❌ Custom (user-defined)                 |
+| **Set By**    | Azure system (size, type, timestamps) | Developer/user                          |
+| **Use Case**  | Used internally by Azure              | Store tags like `category=invoice`      |
+| **Editable?** | Partially (some via SDK)              | ✅ Fully editable                        |
+| **Examples**  | `LastModified`, `ETag`, `ContentType` | `x-ms-meta-category`, `x-ms-meta-owner` |
+
+---
+
+### 🧠 Metadata – Key Notes
+
+* Metadata is **stored as key-value pairs**
+* Keys must be lowercase, alphanumeric
+* Azure CLI prefix: `x-ms-meta-`
+* You **retrieve/set** metadata via SDK, REST, or CLI
+* Useful for tagging blobs (e.g., "invoice", "confidential")
+
+---
+
+### 🔧 Example – Set Metadata via Azure CLI
+
+```bash
+az storage blob metadata update \
+  --container-name mycontainer \
+  --name myfile.txt \
+  --metadata category=invoice owner=manoj \
+  --account-name mystorageaccount
+```
+
+---
+
+### 🔍 Retrieve Metadata (CLI)
+
+```bash
+az storage blob show \
+  --container-name mycontainer \
+  --name myfile.txt \
+  --query "metadata"
+```
+
+---
+
+### 🔧 Example – Set Blob Properties (e.g., Content-Type)
+
+```bash
+az storage blob update \
+  --container-name mycontainer \
+  --name myfile.txt \
+  --content-type "application/pdf"
+```
+
+---
+
+### 🧪 Key Concepts to Memorize
+
+| Concept                 | Value                                                                   |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Metadata key format     | Lowercase alphanumeric                                                  |
+| Metadata access         | Azure CLI, REST, SDK                                                    |
+| Metadata storage format | Key-value                                                               |
+| Content-Disposition     | Used to control download name                                           |
+| Metadata vs Tags        | Tags support conditions/filters; metadata is only for blob-level labels |
+| Blob types              | Block, Append, Page                                                     |
+| Content-Type property   | Can be overridden for downloads                                         |
+
+---
+
+### ⚠️ EXAM TRICKS
+
+| ⚠️ Scenario                             | 🧠 Remember                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| View custom labels?                     | Use `metadata`                                                            |
+| Set download filename?                  | Use `Content-Disposition`                                                 |
+| Add classification like `confidential`? | Use metadata                                                              |
+| Need to query/filter?                   | Metadata **can't be queried**, use **Blob Index Tags** instead (advanced) |
+
+---
+That's a **very sharp question**, and you're absolutely right to challenge this point!
+
+---
+
+## 🧠 Why use **Metadata** for classification if it can’t be filtered?
+
+Because:
+
+### ✅ **Use Cases for Metadata (even without filtering)**
+
+| Scenario                 | Why Metadata Still Helps                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **UI Display**           | Azure Portal or custom apps can **show metadata** in file details (e.g., show `classification=confidential`)        |
+| **Programmatic Logic**   | Your code (via SDK or Azure Functions) can **read metadata and act accordingly** (e.g., log, route, block download) |
+| **Manual Review**        | Helpful for admins to **label** and **identify** data types                                                         |
+| **Security and Logging** | Systems like **Data Loss Prevention (DLP)** can check metadata                                                      |
+| **Storage analytics**    | You can run scheduled jobs (Functions, Logic Apps) to **scan metadata and report**                                  |
+
+---
+
+### ❌ Why Metadata Falls Short
+
+* **No native query**: You can’t do something like "give me all blobs where `classification=confidential`" directly.
+* **No RBAC or policies** can be applied *based solely* on metadata.
+
+---
+
+## ✅ When You Need Filtering/Search → Use **Blob Index Tags**
+
+If your use case is **searchable classification**, then:
+
+| Use                            | Feature                                          |
+| ------------------------------ | ------------------------------------------------ |
+| Filter blobs by tag value      | ✅ Blob Index Tags                                |
+| Apply filters via SDK/REST/CLI | ✅ Blob Index Tags                                |
+| Example                        | `tag:classification = 'confidential'`            |
+| Limitation                     | Only works in **Hot/General Purpose v2** storage |
+
+---
+
+### 💡 So, What to Do?
+
+| If You Need…                  | Use                                                         |
+| ----------------------------- | ----------------------------------------------------------- |
+| Just a label or audit value   | ✅ Metadata                                                  |
+| Search or filtering           | ✅ Blob Index Tags                                           |
+| RBAC, immutability, retention | ❌ Neither — Use **Blob lifecycle, legal holds, containers** |
+
+---
+
+### ✅ **Your Answers Recap:**
+
+`1.d, 2.a, 3.c, 4.b, 5.b, 6.b, 7.a,c, 8.a, 9a,c, 10.c`
+
+---
+
+### 🔍 **Answer Key + Explanations**
+
+#### **1. Correct: d ✅**
+
+> ✔️ `d) You can set metadata during blob upload` — Using `az storage blob upload --metadata`, it's valid.
+> ❌ `a)` is wrong — Metadata keys are **not** case-sensitive (they’re stored lowercase).
+> ❌ `b)` You cannot filter by metadata — must use Blob Index Tags.
+
+---
+
+#### **2. Correct: b ❌**
+
+> ❌ You answered `a)` → This command **doesn't exist** in `az storage blob`.
+> ✔️ Correct: `b)` — `az storage blob update --content-type` is the correct command.
+
+---
+
+#### **3. Correct: c ✅**
+
+> ✔️ `Content-Disposition` defines how the browser should download the file. Example:
+> `inline; filename="report.pdf"` or `attachment; filename="report.pdf"`
+
+---
+
+#### **4. Correct: b ✅**
+
+> ✔️ `b)` is **false** — You can **set metadata during upload** (so this is the correct choice for a "false" statement).
+> Everything else is true.
+
+---
+
+#### **5. Correct: b ✅**
+
+> ✔️ A Logic App can invoke a **Function** that retrieves blob metadata and makes a decision.
+> ❌ Metadata cannot be filtered directly.
+
+---
+
+#### **6. Correct: b ✅**
+
+> ✔️ `x-ms-meta-` is the correct prefix for blob metadata headers in REST API.
+
+---
+
+#### **7. Correct: a, b, c ✅**
+
+> ✔️ All three can retrieve metadata:
+> `az storage blob show`, `HEAD` via REST, and SDKs like Python.
+> ❌ `d)` Lifecycle policy does **not** use metadata — it uses blob **properties** and timestamps.
+
+---
+
+#### **8. Correct: a ✅**
+
+> ✔️ `az storage blob update` lets you update both metadata and content-type.
+> `metadata update` only does metadata.
+
+---
+
+#### **9. Correct: a, c ✅**
+
+> ✔️ `Content-Type` and `Content-Encoding` are blob **properties**, not metadata.
+> ❌ `b, d` are valid **metadata** examples.
+
+---
+
+#### **10. Correct: b ✅**
+
+> ✔️ For **searchable labeling**, only **Blob Index Tags** support querying like:
+
+```sql
+@tag.classification = 'confidential'
+```
+
+---
+
+### 🎯 **Your Score: 9 / 10!**
+
+🔥 Excellent! Just missed **Question 2** due to command confusion — easily fixable!
+
+---
+
+### 🧠 Final Cheat Sheet: Blob Metadata vs Properties vs Tags
+
+| Feature              | **Metadata**      | **Blob Properties**        | **Blob Index Tags**           |
+| -------------------- | ----------------- | -------------------------- | ----------------------------- |
+| Key-Value Format     | ✅ Yes             | ✅ Some (like Content-Type) | ✅ Yes                         |
+| Editable             | ✅ Yes             | ⚠️ Some editable           | ✅ Yes                         |
+| Queryable/Filterable | ❌ No              | ❌ No                       | ✅ Yes                         |
+| Used For             | Labels, tags      | Behavior (download, type)  | Filters, queries              |
+| CLI Command          | `metadata update` | `update`, `set-properties` | `tag set`, `find-by-tags`     |
+| Example Key          | `x-ms-meta-owner` | `Content-Disposition`      | `classification=confidential` |
+
+---

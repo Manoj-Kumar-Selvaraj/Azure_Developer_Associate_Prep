@@ -538,8 +538,7 @@ az container logs --name mycontainer --resource-group myrg
 
 ---
 
+Great — let’s move on to the next topic in the AZ-204 syllabus:
 
-
-
-
+---
 
