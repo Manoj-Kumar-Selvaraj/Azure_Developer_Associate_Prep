@@ -1090,3 +1090,81 @@ If your use case is **searchable classification**, then:
 | Example Key          | `x-ms-meta-owner` | `Content-Disposition`      | `classification=confidential` |
 
 ---
+
+Perfect! Let's dive into **Section 2.2.2 – Perform operations using SDK** from the AZ-204 exam blueprint.
+
+---
+
+## ✅ **2.2.2 – Perform operations on Blob Storage using SDK**
+
+> This section tests how well you can **write, read, update, and delete** blobs using **Azure SDKs**, especially for **Python**, **.NET**, or **JavaScript/Node.js**.
+
+---
+
+### 🔹 **Common SDK Operations You Should Know**
+
+| Operation      | Key Function                     | Sample (Python)                                 |
+| -------------- | -------------------------------- | ----------------------------------------------- |
+| Upload blob    | `upload_blob()`                  | `blob_client.upload_blob(data)`                 |
+| Download blob  | `download_blob()`                | `data = blob_client.download_blob().readall()`  |
+| List blobs     | `list_blobs()`                   | `for blob in container_client.list_blobs():`    |
+| Delete blob    | `delete_blob()`                  | `blob_client.delete_blob()`                     |
+| Overwrite blob | `overwrite=True` param           | `upload_blob(data, overwrite=True)`             |
+| Set metadata   | `set_blob_metadata()`            | `blob_client.set_blob_metadata({'key': 'val'})` |
+| Read metadata  | `get_blob_properties().metadata` | `blob_client.get_blob_properties().metadata`    |
+
+---
+
+### 🔹 **Quick Setup (Python SDK Example)**
+
+```python
+from azure.storage.blob import BlobServiceClient
+
+conn_str = "<your_connection_string>"
+blob_service_client = BlobServiceClient.from_connection_string(conn_str)
+container_client = blob_service_client.get_container_client("my-container")
+
+# Upload a file
+blob_client = container_client.get_blob_client("example.txt")
+with open("example.txt", "rb") as f:
+    blob_client.upload_blob(f, overwrite=True)
+
+# Download the blob
+data = blob_client.download_blob().readall()
+print(data)
+
+# Set metadata
+blob_client.set_blob_metadata({"classification": "confidential"})
+```
+
+---
+
+### 🔐 **Auth Note**
+
+For production:
+✅ Use **Azure Identity with DefaultAzureCredential**
+❌ Avoid hardcoding connection strings in real apps
+
+---
+
+### 📌 Must-Know SDK Concepts
+
+| Concept                    | Explanation                                         |
+| -------------------------- | --------------------------------------------------- |
+| **BlobClient**             | Interacts with a single blob                        |
+| **ContainerClient**        | Works on entire blob container                      |
+| **BlobServiceClient**      | Root level for storage account                      |
+| **overwrite=True**         | Needed to overwrite blobs (default is False!)       |
+| **Metadata vs Properties** | Use `.set_blob_metadata()` vs `.set_http_headers()` |
+
+---
+
+### ✅ You're expected to:
+
+* Write code to **upload/download** blobs using SDK
+* Apply **metadata** programmatically
+* Work with **streams and file-like objects**
+* Use **async SDKs** (optional knowledge)
+* Know **error handling** best practices (like `ResourceExistsError`, etc.)
+
+---
