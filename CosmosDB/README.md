@@ -450,3 +450,299 @@ Go to your Cosmos DB account > **Insights** > **Requests and Capacity**:
 
 ---
 
+Excellent, Manoj 👨‍💻 — let’s begin **2.1.1: Perform operations using SDK in Azure Cosmos DB** — very exam-relevant and practical.
+
+---
+
+## ✅ 2.1.1 – **Perform Operations on Containers and Items Using SDK**
+
+### 📌 Goal:
+
+Understand how to **interact with Cosmos DB** using the **official SDKs** (mostly Python, .NET, JavaScript) to create databases, containers, and perform CRUD operations on items.
+
+---
+
+### 🚀 What You Should Know
+
+#### 🔹 Cosmos DB Structure Hierarchy:
+
+* **Account** → **Database** → **Container** → **Item**
+* Partition key is **critical** for performance and scalability.
+
+---
+
+### 💻 Key SDK Operations (Python/Node/.NET-like for exam)
+
+#### ✅ Create Database
+
+```python
+database = client.create_database_if_not_exists(id="ProductDB")
+```
+
+#### ✅ Create Container
+
+```python
+container = database.create_container_if_not_exists(
+    id="Products",
+    partition_key=PartitionKey(path="/category")
+)
+```
+
+#### ✅ Insert (Create) Item
+
+```python
+container.create_item({
+    "id": "item1",
+    "name": "iPhone",
+    "category": "electronics"
+})
+```
+
+#### ✅ Read Item
+
+```python
+item = container.read_item(item="item1", partition_key="electronics")
+```
+
+#### ✅ Replace Item (Update)
+
+```python
+item["price"] = 1000
+container.replace_item(item=item, body=item)
+```
+
+#### ✅ Delete Item
+
+```python
+container.delete_item(item="item1", partition_key="electronics")
+```
+
+---
+
+### ⚠️ Exam-Worthy Concepts
+
+| Concept                                     | Tip                                                 |
+| ------------------------------------------- | --------------------------------------------------- |
+| **Partition key**                           | Mandatory when reading, updating, deleting          |
+| **Upsert**                                  | Combines create & update: `container.upsert_item()` |
+| **Throughput**                              | Can be provisioned at DB or Container level         |
+| **Item ID must be unique within partition** | Yes                                                 |
+| **Consistency**                             | Defined at account or request level                 |
+
+---
+
+### 🧪 Real-World Scenario Exam Tip:
+
+> You want to update an item, but it fails because you didn’t provide the partition key.
+> ✅ This is a **common trap in exam** – Cosmos DB always needs the partition key to identify an item.
+
+---
+
+### 🤯 Bonus Edge:
+
+* You can use **LINQ** in .NET or **SQL-style queries** in SDK:
+
+```python
+items = list(container.query_items(
+    query="SELECT * FROM c WHERE c.category='electronics'",
+    enable_cross_partition_query=True
+))
+```
+
+---
+
+let’s break it down **visually and practically** to truly understand **Cosmos DB consistency levels (2.1.2)**.
+
+---
+
+## 🚀 What Is Consistency in Cosmos DB?
+
+When you write data to Cosmos DB and **read it back**, do you want:
+
+* The **latest update immediately**?
+* Or is it okay if it's a **slightly older version**, but faster?
+
+This is **Consistency**: the **accuracy of data when read** from different places.
+
+---
+
+## 🔁 Imagine a Scenario
+
+You have a **global Cosmos DB**:
+
+* 📝 User writes in **India**
+* 📖 User reads in **US**
+
+> **Question**: Should the US user **wait until India finishes writing**?
+> Or is it okay to show them a **slightly old value**?
+
+---
+
+## 🧪 5 Levels of Consistency — with Real-Life Examples
+
+| Consistency Level     | Think of It Like...      | What It Means                                                        |
+| --------------------- | ------------------------ | -------------------------------------------------------------------- |
+| **Strong**            | Google Docs live editing | All users see the **latest data instantly** everywhere.              |
+| **Bounded Staleness** | Email delay: 5 min max   | Users may see data that’s **only 5 mins/100 ops old**.               |
+| **Session**           | Your browser cache       | **You always see your own latest changes**, even if others don’t.    |
+| **Consistent Prefix** | YouTube video buffering  | You may see **older data**, but it's in **correct order**.           |
+| **Eventual**          | Gossip or WhatsApp group | Everyone will see the update **eventually**, but no order guarantee. |
+
+---
+
+## 🔥 Summary Table (Just Memorize This!)
+
+| Level                 | See Latest? | Order? | Fastest?  | Cost?       |
+| --------------------- | ----------- | ------ | --------- | ----------- |
+| **Strong**            | ✅ Always    | ✅ Yes  | ❌ Slowest | 💰 Highest  |
+| **Bounded Staleness** | ⚠️ Mostly   | ✅ Yes  | ❌ Slower  | 💰 High     |
+| **Session**           | ✅ For self  | ✅ Yes  | ✅ Fast    | ✅ Efficient |
+| **Consistent Prefix** | ❌ No        | ✅ Yes  | ✅ Fast    | ✅ Efficient |
+| **Eventual**          | ❌ No        | ❌ No   | ✅ Fastest | ✅ Cheapest  |
+
+---
+
+## 💡 Which One to Use When?
+
+| Use Case                      | Use Level             |
+| ----------------------------- | --------------------- |
+| Banking App / Inventory       | **Strong**            |
+| Shopping Cart / Profile Data  | **Session**           |
+| Order History / Logs          | **Consistent Prefix** |
+| IoT Telemetry / Social Feeds  | **Eventual**          |
+| Tolerant to 5min/100ops delay | **Bounded Staleness** |
+
+---
+
+## 🧠 For the Exam — Tips to Remember
+
+1. **Strong**: Most consistent, least performant (use only when required).
+2. **Eventual**: Least consistent, best performance (good for telemetry).
+3. **Session**: Most used in real-world apps — good balance.
+4. **Prefix vs Eventual**: Prefix = correct order, Eventual = no order.
+5. **Bounded** = "almost strong" with guaranteed lag (e.g., 5 mins).
+
+---
+
+## ✅ 2.1.3 – **Implement Change Feed** in Azure Cosmos DB
+
+---
+
+### 🔹 What Is Change Feed?
+
+> **Change Feed** in Cosmos DB is like a **stream of changes** (inserts & updates) happening to your data — in the order they occurred.
+
+It's like having a **CCTV log** of everything that changed in your database.
+
+---
+
+### 💡 Key Concepts
+
+| Feature            | Description                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **What it tracks** | **Insert** and **Update** operations (not deletes).                                |
+| **Order**          | Guaranteed order by **partition key**.                                             |
+| **Read model**     | You read changes like a **queue** using SDK or Azure Functions.                    |
+| **Retention**      | Infinite retention (by default) with newer SDKs.                                   |
+| **Scale**          | Automatically scales with your container.                                          |
+| **Offset**         | Supports **resuming** from last read using a continuation token (for checkpoints). |
+| **Query Type**     | Cannot use SQL queries; you must consume changes using **pull or push** models.    |
+
+---
+
+### ✅ Common Use Cases
+
+| Use Case                 | Why Change Feed?                        |
+| ------------------------ | --------------------------------------- |
+| Real-time analytics      | Track live order data or events         |
+| Auditing & compliance    | Keep track of all updates               |
+| Sync with another system | Automatically forward changes           |
+| Materialized views       | Update summary or reporting collections |
+
+---
+
+### 🔁 Two Ways to Use Change Feed
+
+| Method         | Description                               | Example                           |
+| -------------- | ----------------------------------------- | --------------------------------- |
+| **Pull Model** | You manually read from the feed using SDK | Python, .NET SDK polling          |
+| **Push Model** | Azure Functions auto-triggered by changes | Cosmos DB trigger in Function App |
+
+---
+
+### 📘 Code Example (Python SDK – Pull)
+
+```python
+container = database.get_container_client("orders")
+for change in container.read_change_feed():
+    print(change)
+```
+
+---
+
+### ⚠️ Exam Tips
+
+| Concept              | Exam Trick                                      |
+| -------------------- | ----------------------------------------------- |
+| Deletes?             | ❌ Not captured by Change Feed                   |
+| Updates?             | ✅ Yes (treated as insert + update)              |
+| Partition key?       | ✅ Order preserved **within** partition key only |
+| Time-window queries? | ❌ Not supported – reads are sequential          |
+| Resume reading?      | ✅ Yes using checkpoint token (lease container)  |
+
+---
+
+### 💡 Real-World Example
+
+> You're building a fraud detection system that needs to **react to new financial transactions in real time**.
+> Change Feed can trigger alerts, or feed events into a pipeline instantly.
+
+---
+
+Excellent attempt, Manoj! Let's go through each answer with **detailed explanations** and follow it up with a **🔥Change Feed Master Cheat Sheet**.
+
+---
+
+### ✅ **Results & Detailed Explanations**
+
+| Q  | Your Answer | ✅ / ❌ | Correct Answer                                          | Explanation                                                                                                          |
+| -- | ----------- | ----- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1  | **a**       | ✅     | a) Insert and Update only                               | Cosmos DB Change Feed captures only inserts and updates (not deletes). Deletes are **not** included.                 |
+| 2  | **c**       | ✅     | c) Use Cosmos DB Change Feed trigger in Azure Functions | This is the most efficient **push model**. You get real-time processing without polling.                             |
+| 3  | **c**       | ✅     | c) Order is guaranteed by partition key                 | Change Feed guarantees **per-partition key ordering** only. Globally, order is not guaranteed.                       |
+| 4  | **b**       | ✅     | b) `read_change_feed()`                                 | In the **Python SDK**, this is the method used to pull changes manually.                                             |
+| 5  | **a**       | ❌     | **b**) Use checkpoints or lease containers              | While idempotent writes help, you **must** store checkpoints (using lease containers) to **resume** after a failure. |
+| 6  | **d**       | ✅     | d) Indefinite                                           | In newer SDKs and Azure portal, **infinite retention** is the default unless explicitly configured otherwise.        |
+| 7  | **c**       | ✅     | c) Deletion tracking                                    | Change Feed **does not** capture deletes. You’ll need soft deletes or other workarounds.                             |
+| 8  | **d**       | ✅     | d) Azure Functions with Lease Containers                | Azure Functions + Lease containers enable **horizontal scaling** and coordinated change processing.                  |
+| 9  | **b**       | ❌     | **c**) Change Feed                                      | Materialized views are maintained by consuming changes (insert/update) via **Change Feed**, not stored procedures.   |
+| 10 | **d**       | ✅     | d) It guarantees processing only once                   | **False** — Change Feed can result in **at-least-once delivery**, so idempotent logic is needed.                     |
+
+---
+
+### 🎯 **Final Score: 8 / 10**
+
+Very strong performance — just missed two nuanced areas:
+
+* Checkpointing with lease containers
+* Change Feed vs stored procedures for materialized views
+
+---
+
+## 🧠 Change Feed – Master Cheat Sheet
+
+| 🔑 Concept                   | 🧩 Details                                                                          |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| **Tracks**                   | Insert + Update operations (❌ no deletes)                                           |
+| **Ordering**                 | Guaranteed **within partition key** only                                            |
+| **Models**                   | Pull (SDKs), Push (Azure Functions)                                                 |
+| **Retention**                | **Indefinite** (latest SDKs)                                                        |
+| **Resume after failure**     | Use **checkpoints** with **lease containers**                                       |
+| **Scaling**                  | Azure Functions + Lease container supports auto-scaling                             |
+| **Best use cases**           | Real-time dashboards, audit logs, syncing to other systems, event-driven processing |
+| **Azure Functions Trigger**  | `CosmosDBTrigger` — automatically reacts to DB changes                              |
+| **SDK Pull Method (Python)** | `container.read_change_feed()`                                                      |
+| **Not suitable for**         | Delete tracking, queries on feed, time-window queries                               |
+| **At-least-once delivery**   | Must write **idempotent processing logic**                                          |
+
+---
