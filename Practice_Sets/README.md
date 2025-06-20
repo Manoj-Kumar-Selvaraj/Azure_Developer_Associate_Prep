@@ -530,4 +530,135 @@ params = [
 ]
 items = container.query_items(query=query, parameters=params)
 
+---
+
+A company uses Azure API Management to expose some of its services.
+
+Each developer consuming APIs must use a single key to obtain access to various APIs without requiring approval from the API publisher.
+
+You need to recommend a solution.
+
+Which solution should you recommend?
+
+Select only one answer.
+
+Define a subscription with all APIs scope.
+
+Define a subscription with product scope.
+This answer is correct.
+
+Restrict access based on caller IPs.
+This answer is incorrect.
+
+Restrict APIs based on client certificate.
+
+Explantion:
+
+This item tests the candidate's knowledge of Azure API Management subscriptions.
+
+When creating a product, several APIs can be added to the product and a subscription can be associated with it. Access should not be granted to all APIs. Developer access should be granted regardless of the caller IP. A client certificate would require a policy to validate the certificate and specific logic to map the client to specific APIs.
+
+---
+
+You create an Azure Service Bus topic with a default message time to live of 10 minutes.
+
+You need to send messages to this topic with a time to live of 15 minutes. The solution must not affect other applications that are using the topic.
+
+What should you recommend?
+
+Select only one answer.
+
+Change the topic’s default time to live to 15 minutes.
+
+Change the specific message’s time to live to 15 minutes.
+This answer is incorrect.
+
+Create a new topic with a default time to live of 15 minutes. Send the messages to this topic.
+This answer is correct.
+
+Update the time to live for the queue containing the topic.
+
+Explanation:
+
+This question tests the candidate's knowledge of Azure Service Bus message expiration.
+
+To avoid affecting existing applications, the time to live of the existing topic must not be changed. A new topic needs to be created. Changing the topic's default time to live will affect other applications. A message-level time to live cannot be higher than the topic's time to live. To avoid affecting existing applications, the time to live of the existing topic or queue must not be changed.
+
+---
+
+You have an Azure Service Bus queue.
+
+You need to ensure a publisher can send messages into a topic and multiple subscribers can become eligible to consume the messages.
+
+Which message routing pattern should you use?
+
+Select only one answer.
+
+simple request/reply
+
+multicast request/reply
+This answer is correct.
+
+multiplexing
+
+multiplexed request/reply
+This answer is incorrect.
+
+Explanation:
+
+This item tests the candidate’s knowledge of message routing in Azure Service Bus, which is part of developing message-based solutions.
+
+A publisher can send a message into a topic and multiple subscribers can become eligible to consume the message. A publisher can send a message into a queue and expect a reply from the message consumer, but multiple subscribers cannot consume the message. This session feature enables multiplexing of streams of related messages through a single queue but cannot be consumed by multiple subscribers. This session feature enables multiplexed replies, allowing several publishers to share a reply queue, but a message cannot be consumed by multiple subscribers.
+
+---
+
+You have an application that requires message queuing.
+
+You need to recommend a solution that meets the following requirements:
+
+automatic duplicate message detection.
+ability to send 2 MB messages.
+Which message queuing solution should you recommend?
+
+Select only one answer.
+
+Azure Service Bus Premium tier
+This answer is correct.
+
+Azure Service Bus Standard tier
+
+Azure Storage queues with locally redundant storage (LRS)
+
+Azure Storage queues with zone-redundant storage (ZRS)
+This item tests the candidate's knowledge of Azure Service Bus.
+
+Explanation: 
+
+Service Bus detects duplicate messages. The Premium tier is required to send messages larger than 256 KB. Although Service Bus detects duplicate messages, the Standard tier only supports messages that are up to 256 KB in size. Azure Storage queues do not support duplicate message detection. Azure Storage queues do not support duplicate message detection.
+
+---
+
+A company is using Azure API Management to expose their APIs to external partners. The company wants to ensure that the APIs are accessible only to users authenticated with OAuth 2.0, and that usage quotas are enforced to prevent abuse.
+
+You need to configure the API Management instance to meet the security and usage requirements.
+
+Which two actions should you perform?
+
+Select all answers that apply.
+
+Configure a validate-jwt policy to authenticate incoming requests.
+This answer is correct.
+
+Deploy an Azure Application Gateway in front of the API Management instance.
+
+Implement IP filtering by defining access restriction policies.
+
+Set up a rate limit by key policy to enforce call quotas.
+This answer is correct.
+
+Explanation:
+
+Configuring a validate-jwt policy is necessary to authenticate users with OAuth 2.0. Setting up a rate limit by key policy helps enforce usage quotas. IP filtering does not address the authentication and quota requirements. Deploying an Azure Application Gateway is not required for these specific needs.
+
+---
 

@@ -146,4 +146,202 @@ curl -H "Authorization: Bearer <access_token>" \
 
 ---
 
+## 🧩 FULL GUIDE: **Azure APIM Policy Structure & Usage**
 
+---
+
+### 🧱 1. **What is a Policy in APIM?**
+
+> A **policy** is a declarative XML-based instruction set that lets you control:
+
+* Request and response behavior
+* Authentication & authorization
+* Routing & transformations
+* Error handling, throttling, caching, and more
+
+You can apply policies:
+
+* At **Product** level
+* At **API** level
+* At **Operation** (endpoint) level
+* In **Inbound**, **Backend**, **Outbound**, and **On-error** stages
+
+---
+
+## 🧭 2. **Policy Structure Overview**
+
+### 🔽 XML Format:
+
+```xml
+<policies>
+  <inbound>
+    <!-- Modify or validate the incoming request -->
+  </inbound>
+  <backend>
+    <!-- Optional: Modify the backend request -->
+  </backend>
+  <outbound>
+    <!-- Modify the response before sending to client -->
+  </outbound>
+  <on-error>
+    <!-- Handle any errors in the pipeline -->
+  </on-error>
+</policies>
+```
+
+---
+
+### 🔄 Processing Flow:
+
+```text
+Client Request
+   ↓
+[INBOUND policies]       --> Modify headers, tokens, validate input
+   ↓
+[BACKEND policies]       --> Customize backend call (optional)
+   ↓
+Call Backend API
+   ↓
+[OUTBOUND policies]      --> Modify response, add headers
+   ↓
+Response to Client
+```
+
+---
+
+## 🔧 3. **Common Policy Examples**
+
+| Stage        | Example Policy                | Use Case                                |
+| ------------ | ----------------------------- | --------------------------------------- |
+| **Inbound**  | `validate-jwt`                | Validate OAuth2 token                   |
+|              | `rate-limit-by-key`           | Enforce usage limits                    |
+|              | `check-header`                | Reject missing/invalid headers          |
+|              | `rewrite-uri`                 | Re-route paths (e.g., `/v1/` to `/v2/`) |
+| **Backend**  | `set-backend-service`         | Dynamically change backend URL          |
+| **Outbound** | `set-header`, `remove-header` | Modify response headers                 |
+|              | `set-body`                    | Replace response body                   |
+| **On-error** | `return-response`             | Custom error message                    |
+
+---
+
+## 🧪 4. **Hands-On Examples**
+
+---
+
+### ✅ A. Add a Rate Limit Policy
+
+```xml
+<inbound>
+  <base />
+  <rate-limit-by-key calls="10" renewal-period="60" counter-key="@(context.Subscription.Id)" />
+</inbound>
+```
+
+💡 **Allows only 10 calls per minute per subscription.**
+
+---
+
+### ✅ B. Validate a JWT Token (OAuth2)
+
+```xml
+<inbound>
+  <validate-jwt header-name="Authorization" require-expiration-time="true" require-scheme="Bearer">
+    <openid-config url="https://login.microsoftonline.com/{tenant-id}/v2.0/.well-known/openid-configuration" />
+    <audiences>
+      <audience>api://your-client-id</audience>
+    </audiences>
+  </validate-jwt>
+</inbound>
+```
+
+💡 Validates the incoming `Authorization` bearer token using Microsoft Entra ID.
+
+---
+
+### ✅ C. Rewrite URI
+
+```xml
+<inbound>
+  <rewrite-uri template="/new-path" />
+</inbound>
+```
+
+💡 If the client sends `/old-path`, APIM redirects it to `/new-path`.
+
+---
+
+### ✅ D. Add Response Header (Outbound)
+
+```xml
+<outbound>
+  <set-header name="X-Custom-Header" exists-action="override">
+    <value>Powered by APIM</value>
+  </set-header>
+</outbound>
+```
+
+💡 Adds a custom header to every response.
+
+---
+
+### ✅ E. Custom Error Handling
+
+```xml
+<on-error>
+  <return-response>
+    <set-status code="500" reason="Custom Error" />
+    <set-body>{"message":"Something went wrong!"}</set-body>
+  </return-response>
+</on-error>
+```
+
+💡 Shows a friendly message if something fails in the pipeline.
+
+---
+
+## 🏗️ 5. Best Practices for Writing Policies
+
+| Tip                                | Why It Helps                            |
+| ---------------------------------- | --------------------------------------- |
+| Use `<base />` at start            | Keeps inherited policy behavior intact  |
+| Use `<choose>` and `<when>`        | Apply different policies based on logic |
+| Minimize backend calls in policies | Reduces performance overhead            |
+| Use named values / variables       | Make config cleaner and secure          |
+| Test in **operation-level** first  | Easier to debug and isolate             |
+
+---
+
+## 📦 6. Reusable Snippets
+
+APIM also supports **Named Values** (formerly named “Properties”) and **Policy Fragments**:
+
+| Feature              | Purpose                                             |
+| -------------------- | --------------------------------------------------- |
+| **Named Values**     | Store keys/secrets/reusables (refer as `{{value}}`) |
+| **Policy Fragments** | Reuse common logic across multiple APIs             |
+
+---
+
+## 💡 7. Tools to Work with Policies
+
+| Tool                      | Purpose                        |
+| ------------------------- | ------------------------------ |
+| Azure Portal (GUI)        | Most user-friendly             |
+| Visual Studio Code Plugin | Local dev + push via ARM/Bicep |
+| Azure REST APIs / CLI     | CI/CD automation               |
+
+---
+
+## ✅ TL;DR Summary
+
+* APIM **policies** are XML rules that manage requests/responses
+* Applied at **inbound, backend, outbound, on-error**
+* Common policies include:
+
+  * `rate-limit-by-key`
+  * `validate-jwt`
+  * `set-header`, `rewrite-uri`
+  * `return-response`
+* You can combine conditions using `<choose>`, `<when>`, `<otherwise>`
+
+---
